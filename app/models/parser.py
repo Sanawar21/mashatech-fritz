@@ -1,4 +1,12 @@
 from ..utils import CATALOG
+from .ad import Ad
+
+
+class Match:
+    def __init__(self, product: str, quantity: int, price: float) -> None:
+        self.product = product
+        self.quantity = quantity
+        self.price = price
 
 
 class AdParser:
@@ -23,38 +31,33 @@ class AdParser:
         return chunks
 
     @staticmethod
-    def get_offer_price(matches: dict, data: dict):
+    def get_offer_price(matches: list[Match], ad: Ad):
         """
         If price is less than 120% / 125% the price of the match and 
         account is not new return the offer price else return False
         """
 
-        if data["acc_age"] <= 7 or data["damaged"] or data["only_pickup"]:
+        if ad.account_age <= 7 or ad.is_damaged or ad.is_only_pickup:
             return False
 
-        estimated_price = sum([x*y for x, y in matches.values()])
-        tolerance = 0.25 if data["price"] >= 80 else 0.2
+        estimated_price = sum(
+            [match.price * match.quantity for match in matches]
+        )
+        tolerance = 0.25 if ad.price >= 80 else 0.2
 
-        if estimated_price + estimated_price * tolerance >= data["price"]:
-            if data["price"] < estimated_price:
-                return data["price"]
+        if estimated_price + estimated_price * tolerance >= ad.price:
+            if ad.price < estimated_price:
+                return ad.price
             else:
                 return estimated_price
         else:
             return False
 
-    def find_matches(self, product_title: str, product_description: str):
-        """
-        returns {
-            "<product>": (<quantity>, <price>)
-        }
-        """
+    def find_matches(self, product_title: str, product_description: str) -> list[Match]:
 
         products = list(CATALOG.keys())
         matched_products = []
-        matches = {
-            # "<product>": (<quantity>, <price>)
-        }
+        matches: list[Match] = []
 
         alphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789 "
         text = " ".join([product_title, product_description])
@@ -80,11 +83,11 @@ class AdParser:
         match_amounts = self.__get_match_amounts(matched_products)
 
         for match in match_amounts.keys():
-            matches[match] = (match_amounts[match], CATALOG[match])
+            matches.append(Match(match, match_amounts[match], CATALOG[match]))
 
         return matches
 
-    def __get_match_amounts(self, matches: "list[str]"):
+    def __get_match_amounts(self, matches: list[str]):
         matches_with_amounts = {}
 
         xs = [index for index, x in enumerate(
@@ -102,7 +105,7 @@ class AdParser:
                     matches_with_amounts[match] = 1
             return matches_with_amounts
 
-    def __find_product_match(self, products: "list[str]"):
+    def __find_product_match(self, products: list[str]):
         """
         returns the matching product in the catalogue with its price in a tuple.
         returns None if no match found.

@@ -1,0 +1,66 @@
+Editted version
+Types of messages getting sent to the extension:
+
+1.  Send offer to the ad poster.
+
+    format: {
+        "type": "sendOffer",
+        "message": < message that needs to be sent to the ad poster >,
+        "link": < link of the ad >,
+        "offer_price": < price to be offered >
+    }
+
+2. Check offer status
+
+    format: {
+        "type": "checkStatus",
+        "chat_link": < "https://www.kleinanzeigen.de/m-nachrichten.html?conversationId=" + msgId >
+    }
+    
+3. Release payment. (The package is received and is in perfect working condition.)
+
+    format: {
+        "type": "releasePayment",
+        "chat_link": < link to the chat of the ad >,
+    }
+
+4. Delete msg (if accepted but not paid for 24 hours or after 48 hours if not accepted nor rejected)
+
+    format: {
+        "type": "deleteMsg",
+        "chat_link": < link to the chat of the ad >,
+    }
+
+Types of messages receiving from the extension
+
+1. Keep alive ping.
+
+    format: {
+      "type" : "keepAlive"
+    }
+
+2. Offer sent alert.
+
+    format: {
+      "type" : "offerSentAlert",
+      "msg_id" : < id of the conversation >,
+    }
+
+3. Offer status alert.
+
+    format: {
+      "type" : "offerStatusAlert",
+      "ad_link" : < link of the ad >,
+      "price" : < accepted offer price >, optional only when accepted
+      "chat_link" : < link to the chat with the ad poster >, (editted)
+      "payment_link" : < id of the conversation > (whats this?), optional only when accepted
+      "status": <accepted, rejected, paid, pending>
+    }
+
+4.  Amount paid alert.
+
+    format: {
+      "type" : "amountPaidAlert",
+      "link" : < link of the ad for which the payment has been made >,
+      "chat_link" : < link to the conversation > (editted)
+    }
