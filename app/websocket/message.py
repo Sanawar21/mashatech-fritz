@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import Literal
+
 from ..models import Ad, AdParser, Match
 from ..utils import MESSAGES
 
@@ -62,7 +64,7 @@ class ChatLinkMessage(OutgoingMessage):
 
 
 class SendOfferMessage(OutgoingMessage):
-    """    
+    """
     This message is to be send when KleinanzeiganAPI encounters a new ad that matches our search criteria.
 
     format: {
@@ -127,3 +129,75 @@ class ReleasePaymentMessage(ChatLinkMessage):
 
 class DeleteOfferMessage(ChatLinkMessage):
     type_ = "deleteMsg"
+
+
+# CONCRETE CLASSES (Incoming Messages)
+
+class KeepAliveMessage(IncomingMessage):
+    type_ = "keepAlive"
+
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls()
+
+    def process(self):
+        pass
+
+
+class OfferSentMessage(IncomingMessage):
+    type_ = "offerSentAlert"
+
+    def __init__(self, message_id: str) -> None:
+        self.message_id = message_id
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(data.get('msg_id'))
+
+    def process(self):
+        # TODO: Implement
+        pass
+
+
+class OfferStatusAlertMessage(IncomingMessage):
+    type_ = "offerStatusAlert"
+
+    def __init__(self, ad_link: str, price: float, chat_link: str, status: Literal["accepted", "rejected", "paid", "pending"]) -> None:
+        self.ad_link = ad_link
+        self.price = price
+        self.chat_link = chat_link
+        self.status = status
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            data.get('ad_link'),
+            data.get('price'),
+            data.get('chat_link'),
+            data.get('status')
+        )
+
+    def process(self):
+        # TODO: Implement
+        pass
+
+
+class AmountPaidAlertMessage(IncomingMessage):
+    type_ = "amountPaidAlert"
+
+    def __init__(self, ad_link: str, chat_link: str) -> None:
+        self.ad_link = ad_link
+        self.chat_link = chat_link
+
+    def from_dict(cls, data: dict):
+        return cls(
+            data.get('ad_link'),
+            data.get('chat_link')
+        )
+
+    def process(self):
+        # TODO: Implement
+        pass
