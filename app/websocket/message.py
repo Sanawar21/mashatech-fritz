@@ -9,18 +9,18 @@ class InvalidAdException(Exception):
     """Exception raised for unsuitable ads."""
 
 
-# class MessageFactory:
-#     # TODO: Implement types
-#     @staticmethod
-#     def create_message(message_data):
-#         if message_data.get('type') == 'message':
-#             return Message(message_data)
-#         elif message_data.get('type') == 'command':
-#             return Command(message_data)
-#         else:
-#             return UnknownMessage(message_data)
+class MessageFactory:
+    @staticmethod
+    def create_message(message_data: dict):
+        type_ = message_data.get('type')
+        messages = [KeepAliveMessage, OfferSentMessage,
+                    OfferStatusAlertMessage, AmountPaidAlertMessage]
+        for message in messages:
+            if message.type_ == type_:
+                return message.from_dict(message_data)
 
 # ABSTRACT CLASSES
+
 
 class AbstractBaseMessage(ABC):
     @property
