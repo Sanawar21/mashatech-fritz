@@ -44,10 +44,6 @@ class OutgoingMessage(AbstractBaseMessage):
     def to_dict(self):
         pass
 
-    @abstractmethod
-    def build(self):
-        pass
-
 
 class SendOfferMessage(OutgoingMessage):
     """    
@@ -62,6 +58,24 @@ class SendOfferMessage(OutgoingMessage):
 
     type_ = 'sendOffer'
     __parser = AdParser()
+
+    def __init__(self, ad: Ad):
+        """Builds the message to be sent to the extension.
+        Raises InvalidAdException if the Ad does not match our criteria."""
+
+        matches = self.__parser.find_matches(ad.title, ad.description)
+
+        if not matches:
+            raise InvalidAdException
+
+        offer_price = self.__parser.get_offer_price(matches, ad)
+
+        if offer_price:
+            self.message = self.__get_message(matches)
+            self.link = ad.link
+            self.offer_price = offer_price
+        else:
+            raise InvalidAdException
 
     def __get_message(self, matches: list[Match]) -> str:
         products = [match.product for match in matches]
@@ -78,24 +92,25 @@ class SendOfferMessage(OutgoingMessage):
 
         return MESSAGES["universal"]
 
-    def build(self, ad: Ad) -> dict:
-        """Builds the message to be sent to the extension.
-        Raises InvalidAdException if the Ad does not match our criteria."""
+    def to_dict(self):
+        return {
+            "type": self.type_,
+            "message": self.message,
+            "link": self.link,
+            "offer_price": self.offer_price
+        }
 
-        matches = self.__parser.find_matches(ad.title, ad.description)
 
-        if not matches:
-            raise InvalidAdException
+class CheckOfferStatusMessage(OutgoingMessage):
 
-        offer_price = self.__parser.get_offer_price(matches, ad)
+    type_ = "checkStatus"
 
-        if offer_price:
-            # TODO: Send message to telegram
-            return {
-                "type": "sendOffer",
-                "message": self.__get_message(),
-                "link": ad.link,
-                "offer_price": offer_price
-            }
-        else:
-            raise InvalidAdException
+    def __init__(self, message_id) -> None:
+        self.message_id = message_id
+        self.chat_link = "https://www.kleinanzeigen.de/m-nachrichten.html?conversationId=" + message_id
+
+    def to_dict(self):
+        return {
+            "type": self.type_,
+            "chat_link": self.chat_link
+        }
