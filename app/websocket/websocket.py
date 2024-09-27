@@ -4,8 +4,7 @@ import asyncio
 import datetime
 import pytz
 
-from .msg_handler import IncommingMessageHandler
-from .response import OutgoingResponse
+from .messages import MessageFactory
 
 
 class WebSocketServer:
@@ -13,7 +12,7 @@ class WebSocketServer:
         self.host = host
         self.port = port
         self.server = None
-        self.message_handler = IncommingMessageHandler()
+        self.message_factory = MessageFactory()
 
         self.clients = set()
         self.is_running = False
@@ -59,8 +58,10 @@ class WebSocketServer:
         try:
             async for message in websocket:
                 # TODO: Implement message handling
-                response = self.message_handler.handle_message(message)
-                await websocket.send(response)
+                message = self.message_factory.create_message(message)
+                message.process()
+                if message.response:
+                    await websocket.send(message.response)
 
         except websockets.exceptions.ConnectionClosedError:
             pass
@@ -92,6 +93,5 @@ class WebSocketServer:
         fix for an uncertain bug where the server stops sending messages until a new client connects. 
         """
         if self.is_running:
-            print("self-connecting...")
             async with websockets.connect(self.public_address) as ws:
                 await asyncio.sleep(15)
