@@ -17,6 +17,9 @@ class AbstractBaseMessage(ABC):
 
 class IncomingMessage(AbstractBaseMessage):
 
+    def __init__(self):
+        self.response = None
+
     @classmethod
     @abstractmethod
     def from_dict(self, data: dict):

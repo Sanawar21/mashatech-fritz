@@ -6,6 +6,7 @@ class OfferSentMessage(IncomingMessage):
 
     def __init__(self, message_id: str) -> None:
         self.message_id = message_id
+        super().__init()
 
     @classmethod
     def from_dict(cls, data: dict):

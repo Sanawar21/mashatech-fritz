@@ -7,6 +7,7 @@ class AmountPaidAlertMessage(IncomingMessage):
     def __init__(self, ad_link: str, chat_link: str) -> None:
         self.ad_link = ad_link
         self.chat_link = chat_link
+        super().__init__()
 
     def from_dict(cls, data: dict):
         return cls(

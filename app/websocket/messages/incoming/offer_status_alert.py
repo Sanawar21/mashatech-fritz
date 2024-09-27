@@ -10,6 +10,7 @@ class OfferStatusAlertMessage(IncomingMessage):
         self.price = price
         self.chat_link = chat_link
         self.status = status
+        super().__init__()
 
     @classmethod
     def from_dict(cls, data: dict):
