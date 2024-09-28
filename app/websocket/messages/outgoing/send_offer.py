@@ -1,5 +1,5 @@
 from ..base import OutgoingMessage, InvalidAdException
-from ....models import Ad, Match, AdParser
+from ....models import Ad, Match
 from ....utils import MESSAGES
 
 
@@ -15,25 +15,17 @@ class SendOfferMessage(OutgoingMessage):
     }"""
 
     type_ = 'sendOffer'
-    __parser = AdParser()
 
     def __init__(self, ad: Ad):
         """Builds the message to be sent to the extension.
         Raises InvalidAdException if the Ad does not match our criteria."""
 
-        matches = self.__parser.find_matches(ad.title, ad.description)
-
-        if not matches:
+        if not ad.matches or not ad.offer_price:
             raise InvalidAdException
 
-        offer_price = self.__parser.get_offer_price(matches, ad)
-
-        if offer_price:
-            self.message = self.__get_message(matches)
-            self.link = ad.link
-            self.offer_price = offer_price
-        else:
-            raise InvalidAdException
+        self.message = self.__get_message(ad.matches)
+        self.link = ad.link
+        self.offer_price = ad.offer_price
 
     def __get_message(self, matches: list[Match]) -> str:
         products = [match.product for match in matches]

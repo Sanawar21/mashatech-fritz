@@ -1,7 +1,9 @@
+from .parser import AdParser, Match
 from datetime import datetime
 
 
 class Ad:
+    __parser = AdParser()
 
     def __init__(self, data) -> None:
         self.ad = data
@@ -30,6 +32,10 @@ class Ad:
 
         self.is_damaged = self.__is_damaged(
         ) or "defekt" in f"{self.title} {self.description}".lower()
+
+        self.matches: list[Match] = self.__parser.find_matches(
+            self.title, self.description)
+        self.offer_price = self.__parser.get_offer_price(self.matches, self)
 
     def __get_age(self):
         date_str = self.ad["user-since-date-time"]["value"]
