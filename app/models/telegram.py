@@ -1,62 +1,85 @@
-import time
+from ..utils import TG_API_ENDPOINT, TG_AMOUNT_PAID_CHAT_ID, TG_AD_ALERT_CHAT_ID, TG_OFFER_ACCEPTED_CHAT_ID
+from .ad import Ad
+
 import requests
-from ..utils import TG_API_ENDPOINT, TG_AMOUNT_PAID_CHAT_ID
+import datetime
+import pytz
 
 
 class TelegramClient:
 
-    @staticmethod
-    def get_updates(offset=None):
-        url = f"{TG_API_ENDPOINT}/getUpdates"
-        params = {'timeout': 100, 'offset': offset}
-        response = requests.get(url, params=params)
-        return response.json()
+    def __get_current_date(self):
+        """Returns current german time in the format: 1st January, 2021. Friday 12:00:00"""
+        utc_now = datetime.datetime.now(datetime.timezone.utc)
+        german_timezone = pytz.timezone("Europe/Berlin")
+        german_time = utc_now.astimezone(german_timezone)
 
-    @staticmethod
-    def send_message(text, chat_id):
+        def get_day_suffix(day):
+            if 4 <= day <= 20 or 24 <= day <= 30:
+                return "th"
+            else:
+                return ["st", "nd", "rd"][day % 10 - 1]
+
+        formatted_date_time = german_time.strftime(
+            f"%-d{get_day_suffix(german_time.day)} %B, %Y. %A %H:%M:%S"
+        )
+
+        if formatted_date_time.startswith('0'):
+            formatted_date_time = german_time.strftime(
+                f"%#d{get_day_suffix(german_time.day)} %B, %Y. %A %H:%M:%S"
+            )
+
+        return formatted_date_time
+
+    def send_message(self, text, chat_id):
         """
-        set `to` from one of the chat ids in utils.Contants class.
+        set `chat_id` from one of the telegram chat ids in utils.
         """
 
         url = f"{TG_API_ENDPOINT}/sendMessage"
         params = {'chat_id': chat_id, 'text': text}
         requests.get(url, params=params)
 
-    @staticmethod
-    def send_excel_file(excel_file_path, chat_id=TG_AMOUNT_PAID_CHAT_ID):
-        url = f"{TG_API_ENDPOINT}/sendDocument"
-        files = {'document': open(excel_file_path, 'rb')}
-        params = {'chat_id': chat_id}
-        return requests.post(url, files=files, data=params)
+    def send_ad_alert(self, ad: Ad):
+        text_lines = [
+            f"Title: {ad.title}",
+            "Products:",
+            "\n".join(
+                [f"    {match.quantity}x {match.product} ({match.price} € each)" for match in ad.matches]),
+            f"Calculated Price: {sum([match.price for match in ad.matches])} €",
+            f"Offered Price: {int(ad.offer_price)} €",
+            f"Listed Price: {int(ad.price)} €",
+            f"Link: <a href=\"{ad.link}\">Click here</a>"
+        ]
+        text = "\n".join(text_lines)
+        self.send_message(text, TG_AD_ALERT_CHAT_ID)
 
-    def listen_and_run(self):
-        """
-        listens for "sheet" in chats and sends the excel file where it finds them.
-        """
+    def send_offer_accepted_alert(self, ad: Ad, price: float, ad_chat_link: str):
+        text_lines = [
+            f"Title: {ad.title}",
+            "Products:",
+            "\n".join(
+                [f"    {match.quantity}x {match.product} ({match.price} € each)" for match in ad.matches]),
+            f"Amount To Pay: {int(price)} €",
+            f"Chat Link: <a href=\"{ad_chat_link}\">Click here</a>"
+        ]
+        text = "\n".join(text_lines)
+        self.send_message(text, TG_OFFER_ACCEPTED_CHAT_ID)
 
-        last_update_id = None
-
-        while True:
-            updates = self.get_updates(last_update_id)
-
-            if 'result' in updates:
-                for update in updates['result']:
-                    last_update_id = update['update_id'] + 1
-                    message = update.get('message')
-
-                    if message:
-                        chat_id = message['chat']['id']
-                        text = message.get('text')
-
-                        if text and text.lower() == 'sheet':
-                            self.send_message(
-                                'Sending the Excel file...', chat_id)
-                            self.send_excel_file(chat_id)
-                        else:
-                            self.send_message(
-                                'Send "sheet" to receive an Excel file.', chat_id)
-
-            time.sleep(1)
+    def send_amount_paid_alert(self, ad: Ad, ad_chat_link: str):
+        text_lines = [
+            f"Title: {ad.title}",
+            f"Poster: {ad.poster_name}",
+            f"Date: {TelegramClient.__get_current_date()}",
+            f"Postal code: {ad.zip_code}",
+            "Products:",
+            "\n".join(
+                [f"    {match.quantity}x {match.product} ({match.price} € each)" for match in ad.matches]),
+            f"Amount Paid: {int(ad.offer_price)} €",
+            f"Chat Link: <a href=\"{ad_chat_link}\">Click here</a>"
+        ]
+        text = "\n".join(text_lines)
+        self.send_message(text, TG_AMOUNT_PAID_CHAT_ID)
 
 
 if __name__ == '__main__':
