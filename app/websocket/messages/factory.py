@@ -1,5 +1,6 @@
 from .incoming import *
 from .base import IncomingMessage
+from ...exceptions import InvalidIncomingMessageException
 
 
 class MessageFactory:
@@ -11,3 +12,6 @@ class MessageFactory:
         for message in messages:
             if message.type_ == type_:
                 return message.from_dict(message_data)
+        else:
+            raise InvalidIncomingMessageException(
+                f"Invalid message type: {type_}")

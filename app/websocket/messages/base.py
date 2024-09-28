@@ -1,10 +1,6 @@
 from abc import ABC, abstractmethod
 
 
-class InvalidAdException(Exception):
-    """Exception raised for unsuitable ads."""
-
-
 # ABSTRACT CLASSES
 
 

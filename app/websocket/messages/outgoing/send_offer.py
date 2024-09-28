@@ -1,6 +1,7 @@
-from ..base import OutgoingMessage, InvalidAdException
+from ..base import OutgoingMessage
 from ....models import Ad, Match
 from ....utils import MESSAGES
+from ....exceptions import InvalidAdException
 
 
 class SendOfferMessage(OutgoingMessage):
@@ -37,7 +38,7 @@ class SendOfferMessage(OutgoingMessage):
                 pass
         else:
             for product in products:
-                if product in ["4020", "4040", "7490", "7530", "7530 ax", "7590", "7590 ax", "6660", "6590", "6591", "5590"]:
+                if product in MESSAGES.keys():
                     return MESSAGES[product]
 
         return MESSAGES["universal"]
