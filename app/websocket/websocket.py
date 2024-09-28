@@ -1,8 +1,6 @@
 import websockets
 import requests
 import asyncio
-import datetime
-import pytz
 
 from .messages import MessageFactory
 
@@ -28,29 +26,6 @@ class WebSocketServer:
         except requests.RequestException as e:
             return f"Error: {e}"
 
-    def get_date_time():
-        """Returns current german time in the format: 1st January, 2021. Friday 12:00:00"""
-        utc_now = datetime.datetime.now(datetime.timezone.utc)
-        german_timezone = pytz.timezone("Europe/Berlin")
-        german_time = utc_now.astimezone(german_timezone)
-
-        def get_day_suffix(day):
-            if 4 <= day <= 20 or 24 <= day <= 30:
-                return "th"
-            else:
-                return ["st", "nd", "rd"][day % 10 - 1]
-
-        formatted_date_time = german_time.strftime(
-            f"%-d{get_day_suffix(german_time.day)} %B, %Y. %A %H:%M:%S"
-        )
-
-        if formatted_date_time.startswith('0'):
-            formatted_date_time = german_time.strftime(
-                f"%#d{get_day_suffix(german_time.day)} %B, %Y. %A %H:%M:%S"
-            )
-
-        return formatted_date_time
-
     async def handle_client(self, websocket, path):
         # Add client to the set of connected clients
         self.clients.add(websocket)
@@ -72,7 +47,6 @@ class WebSocketServer:
 
     async def start(self):
         self.server = await websockets.serve(self.handle_client, self.host, self.port)
-        print(f"WebSocket server started at {self.host}:{self.port}")
         self.is_running = True
 
     async def send_message(self, message):
@@ -85,7 +59,6 @@ class WebSocketServer:
         if self.server:
             self.server.close()
             await self.server.wait_closed()
-            print("WebSocket server stopped")
             self.is_running = False
 
     async def self_connect(self):
@@ -93,5 +66,5 @@ class WebSocketServer:
         fix for an uncertain bug where the server stops sending messages until a new client connects. 
         """
         if self.is_running:
-            async with websockets.connect(self.public_address) as ws:
+            async with websockets.connect(self.public_address):
                 await asyncio.sleep(15)
