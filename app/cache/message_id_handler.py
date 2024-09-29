@@ -1,5 +1,5 @@
 import time
-from ..ad import MessageID
+from ..models import MessageID
 from .base import BaseCache
 
 
