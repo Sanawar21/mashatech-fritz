@@ -35,11 +35,11 @@ class OfferStatusAlertMessage(IncomingMessage):
 
     def process(self):
         if self.status == "accepted":
-            self.__cache.update_message_id_status(self.message_id, "accepted")
+            self.__cache.update_status(self.message_id, "accepted")
             self.__telegram.send_offer_accepted_alert(
                 self.ad_link, self.price, self.chat_link)
         elif self.status == "rejected":
-            self.__cache.delete_message_id(self.message_id)
+            self.__cache.delete(self.message_id)
         elif self.status == "paid":
             # TODO: Implement
             print(f"Offer for {self.ad_link} has been paid.")

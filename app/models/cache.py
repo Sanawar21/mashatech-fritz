@@ -30,27 +30,27 @@ class MessageIDCache:
         with open(self.path, 'w') as file:
             json.dump(self._data, file, indent=4)
 
-    def create_message_id(self, message_id: str):
+    def create(self, message_id: str, ad_id: int):
         self.data.append(
-            MessageID(message_id, int(time.time()), "pending")
+            MessageID(message_id, int(time.time()), "pending", ad_id)
             .to_dict()
         )
         self.__save_data()
 
-    def read_message_id(self, message_id: str):
+    def read(self, message_id: str):
         for msg in self.data:
             if msg['message_id'] == message_id:
                 return MessageID.from_dict(msg)
         return None
 
-    def update_message_id_status(self, message_id: str, status: str):
+    def update_status(self, message_id: str, status: str):
         for msg in self.data:
             if msg['message_id'] == message_id:
                 msg['status'] = status
                 break
         self.__save_data()
 
-    def delete_message_id(self, message_id: str):
+    def delete(self, message_id: str):
         self.data = [
             msg for msg in self.data if msg['message_id'] != message_id
         ]
@@ -58,7 +58,7 @@ class MessageIDCache:
     def clear_data(self):
         self.data = []
 
-    def get_n_day_old_message_ids(self, days: int, status: str = None):
+    def read_n_day_old(self, days: int, status: str = None):
         threshold_time = int(time.time()) - days * 86400
         if status:
             return [
