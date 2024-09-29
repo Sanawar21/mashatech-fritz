@@ -2,7 +2,7 @@ import websockets
 import requests
 import asyncio
 
-from .messages import MessageFactory
+from ..messages import MessageFactory
 
 
 class WebSocketServer:

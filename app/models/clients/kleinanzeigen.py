@@ -116,9 +116,6 @@ class KleinanzeigenClient:
 
         return self.__http_get_json_content(url)['value']
 
-    def get_id(link):
-        return link.split("/")[-1].split("-")[0]
-
     def get_fritz_ads(self):
         to_return = []
 

@@ -7,9 +7,9 @@ class MessageIDCache(BaseCache):
     def __init__(self, path="data/message_ids.json") -> None:
         super().__init__(path)
 
-    def create(self, message_id: str, ad_id: int):
+    def create(self, message_id: str, ad_uid: int):
         data = MessageID(message_id, int(time.time()),
-                         "pending", ad_id).to_dict()
+                         "pending", ad_uid).to_dict()
         super().create(data)
 
     def read(self, message_id: str):

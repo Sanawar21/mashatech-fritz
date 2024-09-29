@@ -14,6 +14,11 @@ class Ad:
         self.is_only_pickup = self.__is_only_pickup()
         self.link = self.ad["link"][-1]["href"]
 
+        self.uid = self.link.split("/")[-1].split("-")[0]
+
+        # date in dd/MM/yyyy format
+        self.date = datetime.now().strftime("%d/%m/%Y")
+
         try:
             self.price = self.ad["price"]["amount"]["value"]
         except:

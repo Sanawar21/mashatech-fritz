@@ -1,6 +1,2 @@
-from .ad import Ad
-from .parser import AdParser, Match
-from .kleinanzeigen import KleinanzeigenClient
-from .telegram import TelegramClient
-from .message_id import MessageID
-from .airtable import AirtableClient
+from .ad import Ad, Match, MessageID
+from .clients import AirtableEntry
