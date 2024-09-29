@@ -3,3 +3,4 @@ requests
 xmljson
 websockets
 pytz
+pyairtable
