@@ -1,5 +1,11 @@
-from ..utils import AT_API_KEY, AT_BASE_ID, AT_TABLE_NAME
+from ...utils import AT_API_KEY, AT_BASE_ID, AT_TABLE_NAME
 from pyairtable import Table
+
+
+class AirtableResult:
+    # TODO: Implement this class
+    def __init__(self, ):
+        self.__dict__ = self
 
 
 class AirtableClient(Table):
@@ -15,12 +21,12 @@ class AirtableClient(Table):
 
     FORMULA = f"{{ZUSTAND}}='{PERFECT}'"
 
-    def __init__(self):
-        super().__init__(AT_BASE_ID, AT_TABLE_NAME, api_key=AT_API_KEY)
-        self.old_perfects = []
+    def __init__(self, old_perfects: list[AirtableResult] = []) -> None:
+        super().__init__(AT_API_KEY, AT_BASE_ID, AT_TABLE_NAME)
+        self.old_perfects = old_perfects
 
     def read_new_perfects(self):
-        results = self.all(formula=self.formula)
+        results = self.all(formula=self.FORMULA)
         filtered_results = [
             result for result in results if result["id"] not in self.old_perfects]
         self.old_perfects.extend(

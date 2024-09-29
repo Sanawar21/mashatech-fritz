@@ -1,6 +1,7 @@
 from ..base import IncomingMessage
-from ....models import MessageIDCache, TelegramClient
-from ....exceptions import InvalidOfferStatusException
+from ....cache_handlers import MessageIDCache
+from ....clients import TelegramClient
+from .....exceptions import InvalidOfferStatusException
 
 from typing import Literal
 from urllib.parse import urlparse, parse_qs

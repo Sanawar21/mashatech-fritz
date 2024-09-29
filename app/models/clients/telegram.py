@@ -1,5 +1,5 @@
-from ..utils import TG_API_ENDPOINT, TG_AMOUNT_PAID_CHAT_ID, TG_AD_ALERT_CHAT_ID, TG_OFFER_ACCEPTED_CHAT_ID
-from .ad import Ad
+from ...utils import TG_API_ENDPOINT, TG_AMOUNT_PAID_CHAT_ID, TG_AD_ALERT_CHAT_ID, TG_OFFER_ACCEPTED_CHAT_ID
+from ..ad import Ad
 
 import requests
 import datetime

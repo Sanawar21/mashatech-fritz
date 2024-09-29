@@ -1,7 +1,7 @@
 from ..base import OutgoingMessage
-from ....models import Ad, Match
-from ....utils import MESSAGES
-from ....exceptions import InvalidAdException
+from ....ad import Ad, Match
+from .....utils import MESSAGES
+from .....exceptions import InvalidAdException
 
 
 class SendOfferMessage(OutgoingMessage):

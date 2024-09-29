@@ -1,12 +1,5 @@
-from ..utils import CATALOG
-from .ad import Ad
-
-
-class Match:
-    def __init__(self, product: str, quantity: int, price: float) -> None:
-        self.product = product
-        self.quantity = quantity
-        self.price = price
+from ...utils import CATALOG
+from .match import Match
 
 
 class AdParser:
@@ -31,8 +24,10 @@ class AdParser:
         return chunks
 
     @staticmethod
-    def get_offer_price(matches: list[Match], ad: Ad):
+    def get_offer_price(matches: list[Match], ad):
         """
+        matches is a list of Match objects
+        ad is an Ad object
         If price is less than 120% / 125% the price of the match and 
         account is not new return the offer price else return False
         """

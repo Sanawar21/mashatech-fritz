@@ -4,8 +4,8 @@ import base64
 from xml.etree.ElementTree import fromstring
 from xmljson import BadgerFish
 
-from .ad import Ad
-from ..utils import KA_USERNAME, KA_PASSWORD
+from ..ad import Ad
+from ...utils import KA_USERNAME, KA_PASSWORD
 
 
 class KleinanzeigenClient:

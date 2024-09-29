@@ -1,5 +1,5 @@
 from ..base import IncomingMessage
-from ....models import MessageIDCache
+from ....cache_handlers import MessageIDCache
 
 
 class OfferSentMessage(IncomingMessage):

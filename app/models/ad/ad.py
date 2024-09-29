@@ -1,4 +1,5 @@
-from .parser import AdParser, Match
+from .parser import AdParser
+from .match import Match
 from datetime import datetime
 
 
