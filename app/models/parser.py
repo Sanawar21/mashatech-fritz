@@ -1,4 +1,4 @@
-from ...utils import CATALOG
+from ..utils import CATALOG
 from .match import Match
 
 

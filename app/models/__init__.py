@@ -1,2 +1,4 @@
-from .ad import Ad, Match, MessageID
-from .clients import AirtableEntry
+from .ad import Ad
+from .airtable_entry import AirtableEntry
+from .match import Match
+from .message_id import MessageId
