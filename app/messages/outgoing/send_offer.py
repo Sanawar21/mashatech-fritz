@@ -1,13 +1,12 @@
 from ..base import OutgoingMessage
-from ....ad import Ad, Match
-from .....utils import MESSAGES
-from .....exceptions import InvalidAdException
+from ...models import Ad, Match
+from ...utils import MESSAGES
+from ...exceptions import InvalidAdException
 
 
 class SendOfferMessage(OutgoingMessage):
     """
     This message is to be send when KleinanzeiganAPI encounters a new ad that matches our search criteria.
-
     format: {
         "type": "sendOffer",
         "message": < message that needs to be sent to the ad poster >,
