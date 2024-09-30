@@ -2,6 +2,7 @@ from ..base import IncomingMessage
 
 
 class KeepAliveMessage(IncomingMessage):
+    """Standard incoming keep-alive message, ignore it."""
     type_ = "keepAlive"
 
     @classmethod

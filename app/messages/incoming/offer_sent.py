@@ -1,14 +1,14 @@
 from ..base import IncomingMessage
-from ....cache_handlers import MessageIDCache
+from ...cache import MessageIDCache
 
 
 class OfferSentMessage(IncomingMessage):
+    """When the extension sends an offer to the ad poster, it will send this message to the websocket."""
+
     type_ = "offerSentAlert"
     __cache = MessageIDCache()
 
     def __init__(self, message_id: str, ad_uid: int) -> None:
-        """When the extension sends and offer to the ad poster, 
-        the extension will send this message to the websocket."""
 
         self.message_id = message_id
         self.ad_uid = int(ad_uid)

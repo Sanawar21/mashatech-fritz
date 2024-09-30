@@ -15,7 +15,7 @@ class BaseCache:
     @data.setter
     def data(self, value):
         self._data = value
-        self.__save_data()
+        self.save()
 
     def __load_data(self):
         try:
@@ -24,13 +24,13 @@ class BaseCache:
         except (FileNotFoundError, json.JSONDecodeError):
             return []
 
-    def __save_data(self):
+    def save(self):
         with open(self.path, 'w') as file:
             json.dump(self._data, file, indent=4)
 
     def create(self, data):
         self.data.append(data)
-        self.__save_data()
+        self.save()
 
     def read(self, key_to_check, value):
         for item in self.data:
@@ -43,7 +43,7 @@ class BaseCache:
             if item[key_to_update] == value:
                 item.update(new_data)
                 break
-        self.__save_data()
+        self.save()
 
     def delete(self, key_to_check, value):
         self.data = [item for item in self.data if item[key_to_check] != value]

@@ -1,17 +1,8 @@
-from app.models.clients import AirtableClient, KleinanzeigenClient
-from app.models import AirtableEntry
+from app.cache import AirtableCache
 
-ac = AirtableClient()
-kc = KleinanzeigenClient()
+atc = AirtableCache()
 
-e = AirtableEntry(
-    11225544,
-    "12/12/2021",
-    [],
-    100,
-    "John Doe",
-    "12345",
-    "https://chat.com"
-)
-
-ac.create(e)
+print(atc.read_old_perfect_ids())
+# atc.update_old_perfect_ids(["1", "2", "3"])
+print(atc.read_old_perfect_ids())
+# atc.clear_data()

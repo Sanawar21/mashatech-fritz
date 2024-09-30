@@ -4,8 +4,8 @@ import base64
 from xml.etree.ElementTree import fromstring
 from xmljson import BadgerFish
 
-from ..ad import Ad
-from ...utils import KA_USERNAME, KA_PASSWORD
+from ..models import Ad
+from ..utils import KA_USERNAME, KA_PASSWORD
 
 
 class KleinanzeigenClient:
@@ -99,9 +99,9 @@ class KleinanzeigenClient:
         content = bf.data(fromstring(xml))
         return content
 
-    def get_ad(self, id):
+    def get_ad(self, id) -> Ad:
         url = f'/ads/{id}.json'
-        return self.__http_get_json_content(url)
+        return Ad(self.__http_get_json_content(url))
 
     def get_view_count(self, id: int):
         """
@@ -136,11 +136,10 @@ class KleinanzeigenClient:
                 for id in new_ads:
 
                     try:
-                        _ad = self.get_ad(id)
+                        ad = self.get_ad(id)
                     except FileNotFoundError:
                         continue
 
-                    ad = Ad(_ad)
                     ad_dict = ad.as_dict()
                     to_return.append(ad_dict)
             except Exception:
