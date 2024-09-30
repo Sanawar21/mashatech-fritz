@@ -14,7 +14,7 @@ class AbstractBaseMessage(ABC):
 class IncomingMessage(AbstractBaseMessage):
 
     def __init__(self):
-        self.response = None
+        self.response: OutgoingMessage | None = None
 
     @classmethod
     @abstractmethod

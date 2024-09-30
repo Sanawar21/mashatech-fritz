@@ -3,6 +3,7 @@ import requests
 import asyncio
 
 from ..messages import MessageFactory
+from ..messages.base import OutgoingMessage
 
 
 class WebSocketServer:
@@ -32,11 +33,10 @@ class WebSocketServer:
         print(f"{websocket.remote_address} connected.")
         try:
             async for message in websocket:
-                # TODO: Implement message handling
                 message = self.message_factory.create_message(message)
                 message.process()
                 if message.response:
-                    await websocket.send(message.response)
+                    await websocket.send(message.response.to_dict())
 
         except websockets.exceptions.ConnectionClosedError:
             pass
@@ -49,10 +49,10 @@ class WebSocketServer:
         self.server = await websockets.serve(self.handle_client, self.host, self.port)
         self.is_running = True
 
-    async def send_message(self, message):
+    async def send_message(self, message: OutgoingMessage):
         """Send a message to all connected clients """
         for client in self.clients:
-            await client.send(message)
+            await client.send(message.to_dict())
 
     async def stop(self):
         """Close the server and all client connections"""
