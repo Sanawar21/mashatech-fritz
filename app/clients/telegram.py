@@ -1,5 +1,5 @@
-from ...utils import TG_API_ENDPOINT, TG_AMOUNT_PAID_CHAT_ID, TG_AD_ALERT_CHAT_ID, TG_OFFER_ACCEPTED_CHAT_ID
-from ..ad import Ad
+from ..utils import TG_API_ENDPOINT, TG_AMOUNT_PAID_CHAT_ID, TG_AD_ALERT_CHAT_ID, TG_OFFER_ACCEPTED_CHAT_ID
+from ..models import Ad
 
 import requests
 import datetime
@@ -31,7 +31,7 @@ class TelegramClient:
 
         return formatted_date_time
 
-    def send_message(self, text, chat_id):
+    def send_message(self, text, chat_id, testing_mode=False):
         """
         set `chat_id` from one of the telegram chat ids in utils.
         """

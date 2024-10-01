@@ -12,13 +12,12 @@ class SendOfferMessage(OutgoingMessage):
         "message": < message that needs to be sent to the ad poster >,
         "link": < link of the ad >,
         "offer_price": < price to be offered >
-    }"""
+    }
+    Raises InvalidAdException if the Ad does not match our criteria."""
 
     type_ = 'sendOffer'
 
     def __init__(self, ad: Ad):
-        """Builds the message to be sent to the extension.
-        Raises InvalidAdException if the Ad does not match our criteria."""
 
         if not ad.matches or not ad.offer_price:
             raise InvalidAdException

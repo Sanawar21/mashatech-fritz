@@ -116,7 +116,7 @@ class KleinanzeigenClient:
 
         return self.__http_get_json_content(url)['value']
 
-    def get_fritz_ads(self):
+    def get_fritz_ads(self) -> list[Ad]:
         to_return = []
 
         keywords = ["fritz", "fritzbox", "fritz%21box"]
@@ -140,8 +140,7 @@ class KleinanzeigenClient:
                     except FileNotFoundError:
                         continue
 
-                    ad_dict = ad.as_dict()
-                    to_return.append(ad_dict)
+                    to_return.append(ad)
             except Exception:
                 pass
 
