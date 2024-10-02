@@ -32,13 +32,13 @@ class AdParser:
         account is not new return the offer price else return False
         """
 
-        if ad.account_age <= 7 or ad.is_damaged or ad.is_only_pickup:
+        if ad.account_age <= 7 or ad.is_damaged or ad.is_only_pickup or not ad.price:
             return False
 
         estimated_price = sum(
             [match.price * match.quantity for match in matches]
         )
-        tolerance = 0.25 if ad.price and ad.price >= 80 else 0.2
+        tolerance = 0.25 if ad.price >= 80 else 0.2
 
         if estimated_price + estimated_price * tolerance >= ad.price:
             if ad.price < estimated_price:
