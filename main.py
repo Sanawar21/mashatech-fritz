@@ -12,11 +12,10 @@ async def main():
     ka_client = KleinanzeigenClient()
     tg_client = TelegramClient()
     server = WebSocketServer('localhost', 8765)
-    await server.start()
 
-    if not server.is_running:
-        await server.start()
-        print(f"Server started at {server.public_address}")
+    await server.start()
+    print(f"Server started at {server.public_address}")
+
     self_connect_cycle = 0
 
     while True:
