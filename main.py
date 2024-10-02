@@ -65,9 +65,7 @@ async def main():
         if status_check_counter.is_finished():
             print("Checking offer status")
             cached_ids = msg_cache.read_n_day_old(2)
-            print(cached_ids)
             for id_ in cached_ids:
-                print(id_)
                 message = CheckOfferStatusMessage(id_.message_id)
                 await server.send_message(message)
             status_check_counter.restart()
