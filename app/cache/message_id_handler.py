@@ -22,12 +22,12 @@ class MessageIDCache(BaseCache):
     def delete(self, message_id: str):
         super().delete('message_id', message_id)
 
-    def read_n_day_old(self, days: int, status: str = None):
+    def read_n_day_old(self, days: int, status: str = None) -> list[MessageID]:
         threshold_time = int(time.time()) - days * 86400
         if status:
             return [
-                msg for msg in self.data
+                MessageID.from_dict(msg) for msg in self.data
                 if msg['timestamp'] <= threshold_time and msg['status'] == status
             ]
         else:
-            return [msg for msg in self.data if msg['timestamp'] <= threshold_time]
+            return [MessageID.from_dict(msg) for msg in self.data if msg['timestamp'] <= threshold_time]
