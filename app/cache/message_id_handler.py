@@ -27,7 +27,10 @@ class MessageIDCache(BaseCache):
         if status:
             return [
                 MessageID.from_dict(msg) for msg in self.data
-                if msg['timestamp'] <= threshold_time and msg['status'] == status
+                if msg['timestamp'] > threshold_time and msg['status'] == status
             ]
         else:
-            return [MessageID.from_dict(msg) for msg in self.data if msg['timestamp'] <= threshold_time]
+            return [
+                MessageID.from_dict(msg) for msg in self.data
+                if msg['timestamp'] > threshold_time
+            ]
