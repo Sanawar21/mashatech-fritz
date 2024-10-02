@@ -31,6 +31,9 @@ class OfferStatusAlertMessage(IncomingMessage):
         query_params = parse_qs(parsed_url.query)
         return query_params.get('conversationId', [None])[0]
 
+    def __ad_id_from_link(self) -> str:
+        return self.ad_link.split("/")[-1].split("-")[0]
+
     @classmethod
     def from_dict(cls, data: dict):
         return cls(
@@ -42,16 +45,18 @@ class OfferStatusAlertMessage(IncomingMessage):
 
     def process(self):
         if self.status == "accepted":
+            ad_uid = self.__ad_id_from_link()
+            ad = self.__kleinanzeigen.get_ad(ad_uid)
             self.__cache.update_status(self.message_id, "accepted")
             self.__telegram.send_offer_accepted_alert(
-                self.ad_link, self.price, self.chat_link)
+                ad, self.price, self.chat_link)
 
         elif self.status == "rejected":
             self.__cache.delete(self.message_id)
             self.response = DeleteOfferMessage(self.message_id)
 
         elif self.status == "paid":
-            ad_uid = self.ad_link.split("/")[-1].split("-")[0]
+            ad_uid = self.__ad_id_from_link()
             ad = self.__kleinanzeigen.get_ad(ad_uid)
             entry = AirtableEntry.from_ad(ad, self.chat_link)
             self.__airtable.create(entry)
