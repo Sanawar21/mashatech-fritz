@@ -41,7 +41,7 @@ class WebSocketServer:
                     continue
                 message.process()
                 if message.response:
-                    await self.send_message(message.response.to_json())
+                    await self.send_message(message.response)
 
         except websockets.exceptions.ConnectionClosedError:
             pass
@@ -57,7 +57,7 @@ class WebSocketServer:
     async def send_message(self, message: OutgoingMessage):
         """Send a message to all connected clients """
         for client in self.clients:
-            await client.send(message.to_dict())
+            await client.send(message.to_json())
 
     async def stop(self):
         """Close the server and all client connections"""
