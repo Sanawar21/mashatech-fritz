@@ -11,8 +11,8 @@ async def main():
 
     ka_client = KleinanzeigenClient()
     tg_client = TelegramClient()
-    server = WebSocketServer()
-    server.start()
+    server = WebSocketServer('localhost', 8765)
+    await server.start()
 
     if not server.is_running:
         await server.start()
@@ -27,6 +27,8 @@ async def main():
         await asyncio.sleep(1)
         ads = ka_client.get_fritz_ads()
 
+        print(ads)
+
         for ad in ads:
             try:
                 message = SendOfferMessage(ad)
@@ -37,4 +39,4 @@ async def main():
             tg_client.send_ad_alert(ad)
 
 if __name__ == "__main__":
-    pass
+    asyncio.run(main())

@@ -1,6 +1,6 @@
 from .incoming import *
 from .base import IncomingMessage
-from ....exceptions import InvalidIncomingMessageException
+from ..exceptions import InvalidIncomingMessageException
 
 
 class MessageFactory:

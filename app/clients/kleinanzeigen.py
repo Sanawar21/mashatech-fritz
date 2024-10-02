@@ -122,26 +122,26 @@ class KleinanzeigenClient:
         keywords = ["fritz", "fritzbox", "fritz%21box"]
 
         for keyword in keywords:
-            try:
-                ads = self.get_public_ads(keyword=keyword)
-                ads = ads["ads"]["ad"]
-                fresh_ads = [ad["@id"] for ad in ads]
-                new_ads = self.__find_difference(
-                    self.__previous_1000_ads, fresh_ads)
+            # try:
+            ads = self.get_public_ads(keyword=keyword)
+            ads = ads["ads"]["ad"]
+            fresh_ads = [ad["@id"] for ad in ads]
+            new_ads = self.__find_difference(
+                self.__previous_1000_ads, fresh_ads)
 
-                self.__previous_1000_ads.extend(new_ads)
-                self.__previous_1000_ads = self.__previous_1000_ads[len(
-                    self.__previous_1000_ads) - 1000:]
+            self.__previous_1000_ads.extend(new_ads)
+            self.__previous_1000_ads = self.__previous_1000_ads[len(
+                self.__previous_1000_ads) - 1000:]
 
-                for id in new_ads:
+            for id in new_ads:
 
-                    try:
-                        ad = self.get_ad(id)
-                    except FileNotFoundError:
-                        continue
+                try:
+                    ad = self.get_ad(id)
+                except FileNotFoundError:
+                    continue
 
-                    to_return.append(ad)
-            except Exception:
-                pass
+                to_return.append(ad)
+            # except Exception as e:
+            #     pass
 
         return to_return
