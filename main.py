@@ -16,6 +16,7 @@ async def main():
 
     if not server.is_running:
         await server.start()
+        print(f"Server started at {server.public_address}")
     self_connect_cycle = 0
 
     while True:
