@@ -41,7 +41,7 @@ class WebSocketServer:
                     continue
                 message.process()
                 if message.response:
-                    await websocket.send(message.response.to_dict())
+                    await self.send_message(message.response.to_dict())
 
         except websockets.exceptions.ConnectionClosedError:
             pass
