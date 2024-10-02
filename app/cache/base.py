@@ -24,6 +24,9 @@ class BaseCache:
         except (FileNotFoundError, json.JSONDecodeError):
             return []
 
+    def refresh(self):
+        self._data = self.__load_data()
+
     def save(self):
         with open(self.path, 'w') as file:
             json.dump(self._data, file, indent=4)

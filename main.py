@@ -41,6 +41,8 @@ async def main():
 
     while True:
 
+        msg_cache.refresh()
+
         if self_connect_counter.is_finished():
             await server.self_connect()
             self_connect_counter.restart()
