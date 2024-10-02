@@ -1,7 +1,7 @@
 class MessageID:
     """Message ID model that will be saved to the database."""
 
-    def __init__(self, message_id: str, timestamp: int, status: str, ad_uid: int) -> None:
+    def __init__(self, message_id: str, timestamp: int, status: str, ad_uid: str) -> None:
         self.message_id = message_id
         self.timestamp = timestamp
         self.status = status

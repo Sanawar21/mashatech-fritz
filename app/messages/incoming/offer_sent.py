@@ -8,10 +8,10 @@ class OfferSentMessage(IncomingMessage):
     type_ = "offerSentAlert"
     __cache = MessageIDCache()
 
-    def __init__(self, message_id: str, ad_uid: int) -> None:
+    def __init__(self, message_id: str, ad_uid: str) -> None:
 
         self.message_id = message_id
-        self.ad_uid = int(ad_uid)
+        self.ad_uid = ad_uid
         super().__init__()
 
     @classmethod
