@@ -4,6 +4,7 @@ import asyncio
 
 from ..messages import MessageFactory
 from ..messages.base import OutgoingMessage
+from ..exceptions import InvalidIncomingMessageException
 
 
 class WebSocketServer:
@@ -33,7 +34,11 @@ class WebSocketServer:
         print(f"{websocket.remote_address} connected.")
         try:
             async for message in websocket:
-                message = self.message_factory.create_message(message)
+                try:
+                    message = self.message_factory.create_message(message)
+                except InvalidIncomingMessageException as e:
+                    print(e)
+                    continue
                 message.process()
                 if message.response:
                     await websocket.send(message.response.to_dict())
