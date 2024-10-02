@@ -85,8 +85,10 @@ class AdParser:
     def __get_match_amounts(self, matches: list[str]):
         matches_with_amounts = {}
 
-        xs = [index for index, x in enumerate(
-            self.tokens) if x == "x" and self.tokens[index - 1] in "01234567890"]
+        xs = []
+        for index, x in enumerate(self.tokens):
+            if self.tokens[index - 1] and x == "x" and self.tokens[index - 1] in "0123456789":
+                xs.append(index - 1)
 
         if xs == []:
             return {m: 1 for m in matches}
