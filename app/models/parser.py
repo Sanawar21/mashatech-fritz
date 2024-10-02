@@ -96,7 +96,10 @@ class AdParser:
             for x in xs:
                 for token in self.tokens[x:]:
                     if token in matches:
-                        matches_with_amounts[token] = int(self.tokens[x-1])
+                        try:
+                            matches_with_amounts[token] = int(self.tokens[x-1])
+                        except ValueError:
+                            matches_with_amounts[token] = 1
             for match in matches:
                 if match not in matches_with_amounts.keys():
                     matches_with_amounts[match] = 1
