@@ -31,7 +31,7 @@ class TelegramClient:
 
         return formatted_date_time
 
-    def send_message(self, text, chat_id, testing_mode=False):
+    def send_message(self, text, chat_id):
         """
         set `chat_id` from one of the telegram chat ids in utils.
         """
@@ -49,7 +49,7 @@ class TelegramClient:
             f"Calculated Price: {sum([match.price for match in ad.matches])} €",
             f"Offered Price: {int(ad.offer_price)} €",
             f"Listed Price: {int(ad.price)} €",
-            f"Link: <a href=\"{ad.link}\">Click here</a>"
+            f"Link: {ad.link}"
         ]
         text = "\n".join(text_lines)
         self.send_message(text, TG_AD_ALERT_CHAT_ID)
@@ -61,7 +61,7 @@ class TelegramClient:
             "\n".join(
                 [f"    {match.quantity}x {match.product} ({match.price} € each)" for match in ad.matches]),
             f"Amount To Pay: {int(price)} €",
-            f"Chat Link: <a href=\"{ad_chat_link}\">Click here</a>"
+            f"Chat Link: {ad_chat_link}"
         ]
         text = "\n".join(text_lines)
         self.send_message(text, TG_OFFER_ACCEPTED_CHAT_ID)
@@ -70,13 +70,13 @@ class TelegramClient:
         text_lines = [
             f"Title: {ad.title}",
             f"Poster: {ad.poster_name}",
-            f"Date: {TelegramClient.__get_current_date()}",
+            f"Date: {self.__get_current_date()}",
             f"Postal code: {ad.zip_code}",
             "Products:",
             "\n".join(
                 [f"    {match.quantity}x {match.product} ({match.price} € each)" for match in ad.matches]),
             f"Amount Paid: {int(ad.offer_price)} €",
-            f"Chat Link: <a href=\"{ad_chat_link}\">Click here</a>"
+            f"Chat Link: {ad_chat_link}"
         ]
         text = "\n".join(text_lines)
         self.send_message(text, TG_AMOUNT_PAID_CHAT_ID)
