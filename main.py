@@ -27,11 +27,10 @@ async def main():
         await asyncio.sleep(1)
         ads = ka_client.get_fritz_ads()
 
-        print(ads)
-
         for ad in ads:
             try:
                 message = SendOfferMessage(ad)
+                print(message)
             except InvalidAdException:
                 continue
 
