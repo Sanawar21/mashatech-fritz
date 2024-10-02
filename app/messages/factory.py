@@ -2,11 +2,14 @@ from .incoming import *
 from .base import IncomingMessage
 from ..exceptions import InvalidIncomingMessageException
 
+import json
+
 
 class MessageFactory:
     @staticmethod
-    def create_message(message_data: dict) -> IncomingMessage:
+    def create_message(message_data: str) -> IncomingMessage:
         try:
+            message_data = json.loads(message_data)
             type_ = message_data.get('type')
             messages: list[IncomingMessage] = [KeepAliveMessage, OfferSentMessage,
                                                OfferStatusAlertMessage, AmountPaidAlertMessage]

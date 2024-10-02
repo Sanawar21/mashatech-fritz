@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+import json
 
 # ABSTRACT CLASSES
 
@@ -31,6 +32,9 @@ class OutgoingMessage(AbstractBaseMessage):
     @abstractmethod
     def to_dict(self):
         pass
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
 
 
 class ChatLinkMessage(OutgoingMessage):
