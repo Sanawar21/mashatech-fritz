@@ -14,5 +14,5 @@ class MessageFactory:
                 if message.type_ == type_:
                     return message.from_dict(message_data)
         except AttributeError:
-            pass
+            raise InvalidIncomingMessageException("Message type not found")
         raise InvalidIncomingMessageException(f"Invalid message type: {type_}")
