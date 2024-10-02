@@ -3,6 +3,7 @@ from .base import IncomingMessage
 from ..exceptions import InvalidIncomingMessageException
 
 import json
+from json.decoder import JSONDecodeError
 
 
 class MessageFactory:
@@ -16,6 +17,6 @@ class MessageFactory:
             for message in messages:
                 if message.type_ == type_:
                     return message.from_dict(message_data)
-        except AttributeError:
+        except (AttributeError, JSONDecodeError):
             raise InvalidIncomingMessageException("Message type not found")
         raise InvalidIncomingMessageException(f"Invalid message type: {type_}")
