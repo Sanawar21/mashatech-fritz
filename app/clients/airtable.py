@@ -29,4 +29,5 @@ class AirtableClient(Table):
         """
         Create a new entry in the Airtable database.
         """
+        print(entry.to_dict())
         return super().create(entry.to_dict())
