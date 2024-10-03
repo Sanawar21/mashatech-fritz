@@ -44,6 +44,7 @@ class OfferStatusAlertMessage(IncomingMessage):
         )
 
     def process(self):
+        self.__cache.refresh()
         if self.status == "accepted":
             ad_uid = self.__ad_id_from_link()
             ad = self.__kleinanzeigen.get_ad(ad_uid)

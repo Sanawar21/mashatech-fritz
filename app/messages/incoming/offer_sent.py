@@ -20,4 +20,5 @@ class OfferSentMessage(IncomingMessage):
         return cls(data.get('msg_id'), data.get('offer_id'))
 
     def process(self):
+        self.__cache.refresh()
         self.__cache.create(self.message_id, self.ad_uid)

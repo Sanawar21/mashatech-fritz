@@ -28,4 +28,5 @@ class AmountPaidAlertMessage(IncomingMessage):
 
     def process(self):
         # remove the message_id from the cache
+        self.__cache.refresh()
         self.__cache.delete(self.__id_from_link(self.chat_link))
