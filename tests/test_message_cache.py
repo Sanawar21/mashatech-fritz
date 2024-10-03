@@ -1,5 +1,4 @@
 from app.cache import MessageIDCache
-from app.models import MessageID
 
 msg_cache = MessageIDCache()
 
