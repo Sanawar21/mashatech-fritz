@@ -32,7 +32,7 @@ class Ad:
         except:
             self.poster_name = None
         try:
-            self.zip_code = self.ad["ad-address"]["zip-code"]
+            self.zip_code = self.ad["ad-address"]["zip-code"]["value"]
         except:
             self.zip_code = None
 

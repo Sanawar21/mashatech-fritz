@@ -58,6 +58,7 @@ class OfferStatusAlertMessage(IncomingMessage):
 
         elif self.status == "paid":
             ad_uid = self.__ad_id_from_link()
+            self.__cache.update_status(self.message_id, "paid")
             ad = self.__kleinanzeigen.get_ad(ad_uid)
             entry = AirtableEntry.from_ad(ad, self.chat_link)
             self.__airtable.create(entry)
