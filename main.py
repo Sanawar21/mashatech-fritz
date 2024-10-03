@@ -29,13 +29,13 @@ async def main():
     # # initialize counters
     status_check_counter = Counter(0, 5, 0)
     offers_reset_counter = Counter(1, 0, 0)
-    pending_deletion_counter = Counter(48, 0, 0)
+    # pending_deletion_counter = Counter(48, 0, 0)
     accepted_deletion_counter = Counter(24, 0, 0)
     self_connect_counter = Counter(0, 5, 0)
 
     # testing counters
     # status_check_counter = Counter(0, 1, 0)
-    # pending_deletion_counter = Counter(0, 1, 0)
+    pending_deletion_counter = Counter(0, 1, 0)
     # accepted_deletion_counter = Counter(0, 0, 30)
     # self_connect_counter = Counter(0, 5, 0)
 
