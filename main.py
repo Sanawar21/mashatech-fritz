@@ -1,5 +1,6 @@
 import asyncio
 import queue
+import time
 
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
@@ -13,7 +14,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("output.log"),
+        logging.FileHandler(f"logs/output-{int(time.time())}.log"),
         logging.StreamHandler(sys.stdout)
     ]
 )
