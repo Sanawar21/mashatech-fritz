@@ -4,6 +4,35 @@ import queue
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 
+# setup logging
+import logging
+import sys
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("output.log"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+# Function to handle uncaught exceptions
+
+
+def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        # Allow keyboard interrupts to pass through
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logging.error("Uncaught Exception", exc_info=(
+        exc_type, exc_value, exc_traceback))
+
+
+# Set the custom exception hook
+sys.excepthook = log_uncaught_exceptions
+
 
 async def main():
     from app.clients import KleinanzeigenClient, TelegramClient, AirtableClient
@@ -23,7 +52,7 @@ async def main():
 
     server = WebSocketServer('0.0.0.0', 8765)
 
-    pending_offers_queue = queue.Queue()
+    pending_msgs_queue = queue.Queue()  # Contains SendOfferMessage s
     offers_sent = 0
 
     # # initialize counters
@@ -40,7 +69,7 @@ async def main():
     # self_connect_counter = Counter(0, 5, 0)
 
     await server.start()
-    print(f"Server started at {server.public_address}")
+    logging.info(f"Server started at {server.public_address}")
 
     # start counters
     offers_reset_counter.start()
@@ -54,6 +83,7 @@ async def main():
         msg_cache.refresh()
 
         if self_connect_counter.is_finished():
+            logging.info("Attempting self connect")
             await server.self_connect()
             self_connect_counter.restart()
 
@@ -68,15 +98,19 @@ async def main():
                 continue
 
             if offers_sent <= 50:
+                logging.info(f"Sending offer to {ad.uid}")
                 await server.send_message(message)
                 tg_client.send_ad_alert(ad)
                 offers_sent += 1
             else:
-                pending_offers_queue.put(message)
+                logging.info(f"Putting {ad.uid} in queue")
+                pending_msgs_queue.put(message)
 
         # send pending offers
-        while not pending_offers_queue.empty() and offers_sent <= 50:
-            message = pending_offers_queue.get()
+        while not pending_msgs_queue.empty() and offers_sent <= 50:
+            message = pending_msgs_queue.get()
+            logging.info(f"Sending offer to {message.link} (from queue)")
+            tg_client.send_ad_alert(ad)
             await server.send_message(message)
             offers_sent += 1
 
@@ -90,7 +124,9 @@ async def main():
             cached_ids = msg_cache.read_n_day_old(2)
             for id_ in cached_ids:
                 if id_.status != "paid":
-                    message = CheckOfferStatusMessage(id_.message_id)
+                    logging.info(
+                        f"Sending status check message for {id_.message_id}")
+                    message = CheckOfferStatusMessage(id_.ad_uid)
                     await server.send_message(message)
             status_check_counter.restart()
 
@@ -98,6 +134,8 @@ async def main():
         if pending_deletion_counter.is_finished():
             pending_offers = msg_cache.read_n_day_old(2, "pending")
             for offer in pending_offers:
+                logging.info(
+                    f"Sending delete offer message for {offer.ad_uid} (pending)")
                 message = DeleteOfferMessage(offer.message_id)
                 msg_cache.delete(offer.message_id)
                 await server.send_message(message)
@@ -107,6 +145,9 @@ async def main():
         if accepted_deletion_counter.is_finished():
             accepted_offers = msg_cache.read_n_day_old(1, "accepted")
             for offer in accepted_offers:
+                logging.info(
+                    f"Sending delete offer message for {offer.ad_uid} (accepted)")
+
                 message = DeleteOfferMessage(offer.message_id)
                 msg_cache.delete(offer.message_id)
                 await server.send_message(message)
@@ -116,6 +157,7 @@ async def main():
         if datetime.now().hour == 0:
             perfect_ads = at_client.read_new_perfects()
             for ad in perfect_ads:
+                logging.info(f"Releasing payment for {ad.get("Ad UID")}")
                 chat_link = ad.get("Link")
                 parsed_url = urlparse(chat_link)
                 query_params = parse_qs(parsed_url.query)
