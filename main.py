@@ -163,7 +163,7 @@ async def main():
         if datetime.now().hour == 0:
             perfect_ads = at_client.read_new_perfects()
             for ad in perfect_ads:
-                logging.info(f"Releasing payment for {ad.get("Ad UID")}")
+                logging.info(f"Releasing payment for {ad.get('Ad UID')}")
                 chat_link = ad.get("Link")
                 parsed_url = urlparse(chat_link)
                 query_params = parse_qs(parsed_url.query)
