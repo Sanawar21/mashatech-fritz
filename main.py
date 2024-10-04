@@ -1,6 +1,5 @@
 import asyncio
 import queue
-import time
 
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
@@ -8,6 +7,12 @@ from urllib.parse import urlparse, parse_qs
 # setup logging
 import logging
 import sys
+import os
+import time
+
+# create logs directory if not exists
+if not os.path.exists("logs"):
+    os.makedirs("logs")
 
 # Configure logging
 logging.basicConfig(
