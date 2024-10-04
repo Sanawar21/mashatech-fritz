@@ -37,8 +37,8 @@ class WebSocketServer:
             async for message in websocket:
                 try:
                     message = self.message_factory.create_message(message)
-                except InvalidIncomingMessageException as e:
-                    print(e)
+                except InvalidIncomingMessageException:
+                    logging.info(f"Invalid incoming message: {message}")
                     continue
                 message.process()
                 if message.response:

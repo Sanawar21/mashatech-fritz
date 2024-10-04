@@ -172,7 +172,8 @@ async def main():
                 # delete message id from cache
                 msg_cache.delete(message_id)
                 await server.send_message(message)
-
+                tg_client.send_amount_paid_alert(
+                    ka_client.get_ad(ad.get('Ad UID')), chat_link)
 
 if __name__ == "__main__":
     asyncio.run(main())
