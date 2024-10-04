@@ -16,7 +16,7 @@ if not os.path.exists("logs"):
 
 # Configure logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(f"logs/output-{int(time.time())}.log"),
