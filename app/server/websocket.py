@@ -1,6 +1,7 @@
 import websockets
 import requests
 import asyncio
+import logging
 
 from ..messages import MessageFactory
 from ..messages.base import OutgoingMessage
@@ -31,7 +32,7 @@ class WebSocketServer:
     async def handle_client(self, websocket, path):
         # Add client to the set of connected clients
         self.clients.add(websocket)
-        print(f"{websocket.remote_address} connected.")
+        logging.info(f"{websocket.remote_address} connected.")
         try:
             async for message in websocket:
                 try:
@@ -48,7 +49,7 @@ class WebSocketServer:
         finally:
             # Remove client from the set of connected clients when they disconnect
             self.clients.remove(websocket)
-            print(f"{websocket.remote_address} disconnected.")
+            logging.info(f"{websocket.remote_address} disconnected.")
 
     async def start(self):
         self.server = await websockets.serve(self.handle_client, self.host, self.port)
