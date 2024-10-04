@@ -4,6 +4,8 @@ from ..cache import AirtableCache
 
 from pyairtable import Table
 
+import logging
+
 
 class AirtableClient(Table):
 
@@ -29,5 +31,5 @@ class AirtableClient(Table):
         """
         Create a new entry in the Airtable database.
         """
-        print(entry.to_dict())
+        logging.info(f"Creating new entry in Airtable for {entry.ad_id}")
         return super().create(entry.to_dict())

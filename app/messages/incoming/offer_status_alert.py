@@ -8,6 +8,8 @@ from ..outgoing import DeleteOfferMessage
 from typing import Literal
 from urllib.parse import urlparse, parse_qs
 
+import logging
+
 
 class OfferStatusAlertMessage(IncomingMessage):
     """The extension will send this message when we request the status of an offer."""
@@ -47,16 +49,20 @@ class OfferStatusAlertMessage(IncomingMessage):
         self.__cache.refresh()
         if self.status == "accepted":
             ad_uid = self.__ad_id_from_link()
+            logging.info(f"Offer for {self.ad_link} has been accepted.")
             ad = self.__kleinanzeigen.get_ad(ad_uid)
             self.__cache.update_status(self.message_id, "accepted")
             self.__telegram.send_offer_accepted_alert(
                 ad, self.price, self.chat_link)
 
         elif self.status == "rejected":
+            logging.info(f"Offer for {self.ad_link} has been rejected.")
             self.__cache.delete(self.message_id)
             self.response = DeleteOfferMessage(self.message_id)
 
         elif self.status == "paid":
+            logging.info(
+                f"Payment for {self.ad_link} has been made, waiting for perfection confirmation.")
             ad_uid = self.__ad_id_from_link()
             self.__cache.update_status(self.message_id, "paid")
             ad = self.__kleinanzeigen.get_ad(ad_uid)

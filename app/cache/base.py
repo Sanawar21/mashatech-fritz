@@ -1,4 +1,5 @@
 import json
+import logging
 
 
 class BaseCache:
@@ -33,6 +34,7 @@ class BaseCache:
 
     def create(self, data):
         self.data.append(data)
+        logging.info(f"Data added to cache: {data}")
         self.save()
 
     def read(self, key_to_check, value):
@@ -45,11 +47,13 @@ class BaseCache:
         for item in self.data:
             if item[key_to_update] == value:
                 item.update(new_data)
+                logging.log(f"Data updated in cache: {item}")
                 break
         self.save()
 
     def delete(self, key_to_check, value):
         self.data = [item for item in self.data if item[key_to_check] != value]
+        logging.info(f"Data deleted from cache: {value}")
 
     def clear_data(self):
         self.data = []

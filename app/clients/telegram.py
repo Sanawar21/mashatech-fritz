@@ -4,6 +4,7 @@ from ..models import Ad
 import requests
 import datetime
 import pytz
+import logging
 
 
 class TelegramClient:
@@ -52,6 +53,7 @@ class TelegramClient:
             f"Link: {ad.link}"
         ]
         text = "\n".join(text_lines)
+        logging.info("Sending message to Telegram (Ad alert)")
         self.send_message(text, TG_AD_ALERT_CHAT_ID)
 
     def send_offer_accepted_alert(self, ad: Ad, price: float, ad_chat_link: str):
@@ -64,6 +66,7 @@ class TelegramClient:
             f"Chat Link: {ad_chat_link}"
         ]
         text = "\n".join(text_lines)
+        logging.info("Sending message to Telegram (Offer accepted)")
         self.send_message(text, TG_OFFER_ACCEPTED_CHAT_ID)
 
     def send_amount_paid_alert(self, ad: Ad, ad_chat_link: str):
@@ -79,6 +82,7 @@ class TelegramClient:
             f"Chat Link: {ad_chat_link}"
         ]
         text = "\n".join(text_lines)
+        logging.info("Sending message to Telegram (Amount paid)")
         self.send_message(text, TG_AMOUNT_PAID_CHAT_ID)
 
 

@@ -1,6 +1,8 @@
 from ..base import IncomingMessage
 from ...cache import MessageIDCache
 
+import logging
+
 
 class OfferSentMessage(IncomingMessage):
     """When the extension sends an offer to the ad poster, it will send this message to the websocket."""
@@ -21,4 +23,5 @@ class OfferSentMessage(IncomingMessage):
 
     def process(self):
         self.__cache.refresh()
+        logging.info(f"Sending of offer for {self.ad_uid} has been confirmed")
         self.__cache.create(self.message_id, self.ad_uid)

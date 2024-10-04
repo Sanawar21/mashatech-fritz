@@ -3,6 +3,8 @@ from ...cache import MessageIDCache
 
 from urllib.parse import urlparse, parse_qs
 
+import logging
+
 
 class AmountPaidAlertMessage(IncomingMessage):
     """The extension will send this message when it releases the payment."""
@@ -29,4 +31,6 @@ class AmountPaidAlertMessage(IncomingMessage):
     def process(self):
         # remove the message_id from the cache
         self.__cache.refresh()
-        self.__cache.delete(self.__id_from_link(self.chat_link))
+        message_id = self.__id_from_link(self.chat_link)
+        logging.info(f"Payment for {self.ad_link} has been released.")
+        self.__cache.delete(message_id)
