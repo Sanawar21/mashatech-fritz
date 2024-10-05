@@ -1,7 +1,19 @@
 from dotenv import load_dotenv
+from urllib.parse import urlparse, parse_qs
 import os
 
 load_dotenv()
+
+
+def get_ad_id_from_link(link: str) -> str:
+    return link.split("/")[-1].split("-")[0]
+
+
+def get_chat_id_from_link(link: str) -> str:
+    parsed_url = urlparse(link)
+    query_params = parse_qs(parsed_url.query)
+    return query_params.get('conversationId', [None])[0]
+
 
 # Load environment variables
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")

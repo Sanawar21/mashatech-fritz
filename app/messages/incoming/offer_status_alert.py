@@ -4,9 +4,9 @@ from ...clients import TelegramClient, AirtableClient, KleinanzeigenClient
 from ...exceptions import InvalidOfferStatusException
 from ...models import AirtableEntry
 from ..outgoing import DeleteOfferMessage
+from ...utils import get_chat_id_from_link, get_ad_id_from_link
 
 from typing import Literal
-from urllib.parse import urlparse, parse_qs
 
 import logging
 
@@ -25,16 +25,8 @@ class OfferStatusAlertMessage(IncomingMessage):
         self.price = price
         self.chat_link = chat_link
         self.status = status
-        self.message_id = self.__id_from_link()
+        self.message_id = get_chat_id_from_link(self.chat_link)
         super().__init__()
-
-    def __id_from_link(self) -> str:
-        parsed_url = urlparse(self.chat_link)
-        query_params = parse_qs(parsed_url.query)
-        return query_params.get('conversationId', [None])[0]
-
-    def __ad_id_from_link(self) -> str:
-        return self.ad_link.split("/")[-1].split("-")[0]
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -48,7 +40,7 @@ class OfferStatusAlertMessage(IncomingMessage):
     def process(self):
         self.__cache.refresh()
         if self.status == "accepted":
-            ad_uid = self.__ad_id_from_link()
+            ad_uid = get_ad_id_from_link(self.ad_link)
             logging.info(f"Offer for {self.ad_link} has been accepted.")
             ad = self.__kleinanzeigen.get_ad(ad_uid)
             self.__cache.update_status(self.message_id, "accepted")
@@ -63,7 +55,7 @@ class OfferStatusAlertMessage(IncomingMessage):
         elif self.status == "paid":
             logging.info(
                 f"Payment for {self.ad_link} has been made, waiting for perfection confirmation.")
-            ad_uid = self.__ad_id_from_link()
+            ad_uid = get_ad_id_from_link(self.ad_link)
             self.__cache.update_status(self.message_id, "paid")
             ad = self.__kleinanzeigen.get_ad(ad_uid)
             entry = AirtableEntry.from_ad(ad, self.chat_link)

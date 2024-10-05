@@ -1,7 +1,7 @@
 from ..base import IncomingMessage
 from ...cache import MessageIDCache
+from ...utils import get_chat_id_from_link
 
-from urllib.parse import urlparse, parse_qs
 
 import logging
 
@@ -17,11 +17,6 @@ class AmountPaidAlertMessage(IncomingMessage):
         self.chat_link = chat_link
         super().__init__()
 
-    def __id_from_link(self) -> str:
-        parsed_url = urlparse(self.chat_link)
-        query_params = parse_qs(parsed_url.query)
-        return query_params.get('conversationId', [None])[0]
-
     def from_dict(cls, data: dict):
         return cls(
             data.get('ad_link'),
@@ -31,6 +26,6 @@ class AmountPaidAlertMessage(IncomingMessage):
     def process(self):
         # remove the message_id from the cache
         self.__cache.refresh()
-        message_id = self.__id_from_link(self.chat_link)
+        message_id = get_chat_id_from_link(self.chat_link)
         logging.info(f"Payment for {self.ad_link} has been released.")
         self.__cache.delete(message_id)

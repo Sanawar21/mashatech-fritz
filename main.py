@@ -2,7 +2,6 @@ import asyncio
 import queue
 
 from datetime import datetime
-from urllib.parse import urlparse, parse_qs
 
 # setup logging
 import logging
@@ -45,17 +44,14 @@ async def main():
     from app.server import WebSocketServer
     from app.models import Counter
     from app.cache import MessageIDCache
-
+    from app.utils import get_ad_id_from_link, get_chat_id_from_link
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
-
     from app.exceptions import InvalidAdException
 
     ka_client = KleinanzeigenClient()
     tg_client = TelegramClient()
     at_client = AirtableClient()
-
     msg_cache = MessageIDCache()
-
     server = WebSocketServer('0.0.0.0', 8766)
 
     pending_msgs_queue = queue.Queue()  # Contains SendOfferMessage s
@@ -164,9 +160,7 @@ async def main():
             perfect_entries = at_client.read_new_perfects()
             for entry in perfect_entries:
                 logging.info(f"Releasing payment for {entry.ad_uid}")
-                parsed_url = urlparse(entry.chat_link)
-                query_params = parse_qs(parsed_url.query)
-                message_id = query_params.get('conversationId', [None])[0]
+                message_id = get_chat_id_from_link(entry.chat_link)
                 message = ReleasePaymentMessage(message_id)
                 await server.send_message(message)
                 tg_client.send_amount_paid_alert(
