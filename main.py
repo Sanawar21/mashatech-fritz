@@ -1,42 +1,8 @@
 import asyncio
 import queue
+import logging
 
 from datetime import datetime
-
-# setup logging
-import logging
-import sys
-import os
-import time
-
-# create logs directory if not exists
-if not os.path.exists("logs"):
-    os.makedirs("logs")
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(f"logs/output-{int(time.time())}.log"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-
-# Function to handle uncaught exceptions
-
-
-def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, KeyboardInterrupt):
-        # Allow keyboard interrupts to pass through
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    logging.error("Uncaught Exception", exc_info=(
-        exc_type, exc_value, exc_traceback))
-
-
-# Set the custom exception hook
-sys.excepthook = log_uncaught_exceptions
 
 
 async def main():
@@ -44,9 +10,11 @@ async def main():
     from app.server import WebSocketServer
     from app.models import Counter
     from app.cache import MessageIDCache
-    from app.utils import get_chat_id_from_link
+    from app.utils import get_chat_id_from_link, setup_logging
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
     from app.exceptions import InvalidAdException
+
+    setup_logging()
 
     ka_client = KleinanzeigenClient()
     tg_client = TelegramClient()

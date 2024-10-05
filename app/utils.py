@@ -15,6 +15,40 @@ def get_chat_id_from_link(link: str) -> str:
     return query_params.get('conversationId', [None])[0]
 
 
+def setup_logging():
+    import logging
+    import sys
+    import os
+    import time
+
+    # create logs directory if not exists
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
+
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(f"logs/output-{int(time.time())}.log"),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+
+    # Function to handle uncaught exceptions
+
+    def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            # Allow keyboard interrupts to pass through
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        logging.error("Uncaught Exception", exc_info=(
+            exc_type, exc_value, exc_traceback))
+
+    # Set the custom exception hook
+    sys.excepthook = log_uncaught_exceptions
+
+
 # Load environment variables
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_AD_ALERT_CHAT_ID = os.getenv("TG_AD_ALERT_CHAT_ID")
