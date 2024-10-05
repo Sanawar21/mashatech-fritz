@@ -58,7 +58,11 @@ class WebSocketServer:
     async def send_message(self, message: OutgoingMessage):
         """Send a message to all connected clients """
         for client in self.clients:
-            await client.send(message.to_json())
+            try:
+                await client.send(message.to_json())
+            except websockets.exceptions.ConnectionClosedError:
+                logging.info(f"Connection to {client.remote_address} closed.")
+                self.clients.remove(client)
 
     async def stop(self):
         """Close the server and all client connections"""
