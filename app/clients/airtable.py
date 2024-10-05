@@ -34,5 +34,5 @@ class AirtableClient(Table):
         """
         Create a new entry in the Airtable database.
         """
-        logging.info(f"Creating new entry in Airtable for {entry.ad_id}")
+        logging.info(f"Creating new entry in Airtable for {entry.ad_uid}")
         return super().create(entry.to_dict())
