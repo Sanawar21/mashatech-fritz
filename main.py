@@ -44,7 +44,7 @@ async def main():
     from app.server import WebSocketServer
     from app.models import Counter
     from app.cache import MessageIDCache
-    from app.utils import get_ad_id_from_link, get_chat_id_from_link
+    from app.utils import get_chat_id_from_link
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
     from app.exceptions import InvalidAdException
 
@@ -63,12 +63,6 @@ async def main():
     pending_deletion_counter = Counter(48, 0, 0)
     accepted_deletion_counter = Counter(24, 0, 0)
     self_connect_counter = Counter(0, 5, 0)
-
-    # testing counters
-    # status_check_counter = Counter(0, 1, 0)
-    # pending_deletion_counter = Counter(0, 1, 0)
-    # accepted_deletion_counter = Counter(0, 1, 0)
-    # self_connect_counter = Counter(0, 5, 0)
 
     await server.start()
     logging.info(f"Server started at {server.public_address}")
@@ -156,7 +150,7 @@ async def main():
             accepted_deletion_counter.restart()
 
         # release payments
-        if True:  # TODO: Change in production
+        if datetime.now().hour == 0:
             perfect_entries = at_client.read_new_perfects()
             for entry in perfect_entries:
                 logging.info(f"Releasing payment for {entry.ad_uid}")
