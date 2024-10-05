@@ -20,6 +20,7 @@ class AmountPaidAlertMessage(IncomingMessage):
         self.chat_link = chat_link
         super().__init__()
 
+    @classmethod
     def from_dict(cls, data: dict):
         return cls(
             data.get('ad_link'),
