@@ -161,17 +161,16 @@ async def main():
 
         # release payments
         if True:
-            perfect_ads = at_client.read_new_perfects()
-            for ad in perfect_ads:
-                logging.info(f"Releasing payment for {ad.get('Ad UID')}")
-                chat_link = ad.get("Link")
-                parsed_url = urlparse(chat_link)
+            perfect_entries = at_client.read_new_perfects()
+            for entry in perfect_entries:
+                logging.info(f"Releasing payment for {entry.ad_uid}")
+                parsed_url = urlparse(entry.chat_link)
                 query_params = parse_qs(parsed_url.query)
                 message_id = query_params.get('conversationId', [None])[0]
                 message = ReleasePaymentMessage(message_id)
                 await server.send_message(message)
                 tg_client.send_amount_paid_alert(
-                    ka_client.get_ad(ad.get('Ad UID')), chat_link)
+                    ka_client.get_ad(entry.ad_uid), entry.chat_link)
 
 if __name__ == "__main__":
     asyncio.run(main())

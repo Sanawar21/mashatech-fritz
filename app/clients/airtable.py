@@ -18,13 +18,16 @@ class AirtableClient(Table):
         self.__cache = AirtableCache()
         self.old_perfect_ids = self.__cache.read_old_perfect_ids()
 
-    def read_new_perfects(self):
+    def read_new_perfects(self) -> list[AirtableEntry]:
         results = self.all(formula=self.FORMULA)
         filtered_results = [
             result for result in results if result["id"] not in self.old_perfect_ids]
         self.old_perfect_ids.extend(
             [result["id"] for result in filtered_results])
         self.__cache.update_old_perfect_ids(self.old_perfect_ids)
+        # create airtable entry objects
+        filtered_results = [AirtableEntry.from_dict(
+            result["fields"]) for result in filtered_results]
         return filtered_results
 
     def create(self, entry: AirtableEntry):
