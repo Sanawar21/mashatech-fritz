@@ -128,7 +128,7 @@ async def main():
                 if id_.status != "paid":
                     logging.info(
                         f"Sending status check message for {id_.message_id}")
-                    message = CheckOfferStatusMessage(id_.ad_uid)
+                    message = CheckOfferStatusMessage(id_.message_id)
                     await server.send_message(message)
             status_check_counter.restart()
 
