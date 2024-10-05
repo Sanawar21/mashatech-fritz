@@ -20,7 +20,7 @@ async def main():
     tg_client = TelegramClient()
     at_client = AirtableClient()
     msg_cache = MessageIDCache()
-    server = WebSocketServer('0.0.0.0', 8766)
+    server = WebSocketServer('0.0.0.0', 8765)
 
     pending_msgs_queue = queue.Queue()  # Contains SendOfferMessage s
     offers_sent = 0
