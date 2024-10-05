@@ -8,6 +8,7 @@ class AirtableCache(BaseCache):
 
     def update_old_perfect_ids(self, old_perfect_ids: list[str]):
         self.data = self.data + old_perfect_ids
+        self.data = list(set(self.data))  # drop duplicates
         self.save()
 
     def read_old_perfect_ids(self):
