@@ -128,7 +128,8 @@ class AdParser:
             tokens.append(None)  # to prevent index out of range
 
             for keyword in keywords:
-                if (tokens[match_index - 1] == keyword or tokens[match_index + 1] == keyword) and ("mbit" not in tokens[match_index + 1]):
+                if (tokens[match_index - 1] == keyword or tokens[match_index + 1] == keyword) \
+                        and (tokens[match_index + 1] is not None and "mbit" not in tokens[match_index + 1]):
                     return True
             return False
 
