@@ -47,7 +47,7 @@ class BaseCache:
         for item in self.data:
             if item[key_to_update] == value:
                 item.update(new_data)
-                logging.log(f"Data updated in cache: {item}")
+                logging.info(f"Data updated in cache: {item}")
                 break
         self.save()
 
