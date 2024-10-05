@@ -36,8 +36,13 @@ class Ad:
         except:
             self.zip_code = None
 
-        self.is_damaged = self.__is_damaged(
-        ) or "defekt" in f"{self.title} {self.description}".lower()
+        self.is_damaged = self.__is_damaged() \
+            or "defekt" in f"{self.title} {self.description}".lower()
+
+        try:
+            self.is_buy_now_available = self.ad["buy-now"]["selected"] == "true"
+        except:
+            self.is_buy_now_available = False
 
         self.matches: list[Match] = self.__parser.find_matches(
             self.title, self.description)

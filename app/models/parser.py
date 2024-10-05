@@ -32,7 +32,7 @@ class AdParser:
         account is not new return the offer price else return False
         """
 
-        if ad.account_age <= 7 or ad.is_damaged or ad.is_only_pickup or not ad.price:
+        if ad.account_age <= 7 or ad.is_damaged or ad.is_only_pickup or not ad.price or not ad.is_buy_now_available:
             return False
 
         estimated_price = sum(
