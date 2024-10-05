@@ -156,15 +156,13 @@ async def main():
             accepted_deletion_counter.restart()
 
         # release payments
-        if True:
+        if True:  # TODO: Change in production
             perfect_entries = at_client.read_new_perfects()
             for entry in perfect_entries:
                 logging.info(f"Releasing payment for {entry.ad_uid}")
                 message_id = get_chat_id_from_link(entry.chat_link)
                 message = ReleasePaymentMessage(message_id)
                 await server.send_message(message)
-                tg_client.send_amount_paid_alert(
-                    ka_client.get_ad(entry.ad_uid), entry.chat_link)
 
 if __name__ == "__main__":
     asyncio.run(main())
