@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 logs/
+data/airtable_products.json
+data/message_ids.json
