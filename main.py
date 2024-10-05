@@ -160,7 +160,7 @@ async def main():
             accepted_deletion_counter.restart()
 
         # release payments
-        if datetime.now().hour == 0:
+        if True:
             perfect_ads = at_client.read_new_perfects()
             for ad in perfect_ads:
                 logging.info(f"Releasing payment for {ad.get('Ad UID')}")
@@ -169,8 +169,6 @@ async def main():
                 query_params = parse_qs(parsed_url.query)
                 message_id = query_params.get('conversationId', [None])[0]
                 message = ReleasePaymentMessage(message_id)
-                # delete message id from cache
-                msg_cache.delete(message_id)
                 await server.send_message(message)
                 tg_client.send_amount_paid_alert(
                     ka_client.get_ad(ad.get('Ad UID')), chat_link)
