@@ -23,7 +23,7 @@ class AmountPaidAlertMessage(IncomingMessage):
     @classmethod
     def from_dict(cls, data: dict):
         return cls(
-            data.get('ad_link'),
+            data.get('link'),
             data.get('chat_link')
         )
 
