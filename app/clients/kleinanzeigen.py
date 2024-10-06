@@ -1,5 +1,6 @@
 import requests
 import base64
+import logging
 
 from xml.etree.ElementTree import fromstring
 from xmljson import BadgerFish
@@ -123,7 +124,10 @@ class KleinanzeigenClient:
 
         for keyword in keywords:
             # try:
-            ads = self.get_public_ads(keyword=keyword)
+            try:
+                ads = self.get_public_ads(keyword=keyword)
+            except FileNotFoundError:
+                logging.error("File not found error in KleinanzeigenClient")
             ads = ads["ads"]["ad"]
             fresh_ads = [ad["@id"] for ad in ads]
             new_ads = self.__find_difference(
