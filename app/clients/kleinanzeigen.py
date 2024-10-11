@@ -128,7 +128,10 @@ class KleinanzeigenClient:
                 ads = self.get_public_ads(keyword=keyword)
             except FileNotFoundError:
                 logging.error("File not found error in KleinanzeigenClient")
-            ads = ads["ads"]["ad"]
+            try:
+                ads = ads["ads"]["ad"]
+            except KeyError:
+                ads = []
             fresh_ads = [ad["@id"] for ad in ads]
             new_ads = self.__find_difference(
                 self.__previous_1000_ads, fresh_ads)
