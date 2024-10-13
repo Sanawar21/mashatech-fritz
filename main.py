@@ -47,7 +47,6 @@ async def main():
         msg_cache.refresh()
 
         if self_connect_counter.is_finished():
-            logging.info("Attempting self connect")
             await server.self_connect()
             self_connect_counter.restart()
 

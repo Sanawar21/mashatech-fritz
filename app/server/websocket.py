@@ -32,7 +32,6 @@ class WebSocketServer:
     async def handle_client(self, websocket, path):
         # Add client to the set of connected clients
         self.clients.add(websocket)
-        logging.info(f"{websocket.remote_address} connected.")
         try:
             async for message in websocket:
                 try:
@@ -49,7 +48,6 @@ class WebSocketServer:
         finally:
             # Remove client from the set of connected clients when they disconnect
             self.clients.remove(websocket)
-            logging.info(f"{websocket.remote_address} disconnected.")
 
     async def start(self):
         self.server = await websockets.serve(self.handle_client, self.host, self.port)
@@ -61,7 +59,6 @@ class WebSocketServer:
             try:
                 await client.send(message.to_json())
             except websockets.exceptions.ConnectionClosedError:
-                logging.info(f"Connection to {client.remote_address} closed.")
                 self.clients.remove(client)
 
     async def stop(self):
