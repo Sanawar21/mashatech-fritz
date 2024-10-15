@@ -28,7 +28,7 @@ class KleinanzeigenClient:
 
         self._session = requests.session()
         self._session.headers.update(headers)
-        self.__previous_1000_ads = []
+        self.previous_ads = []
 
     def __find_difference(self, list1, list2):
         diff_list = []
@@ -134,11 +134,11 @@ class KleinanzeigenClient:
                 ads = []
             fresh_ads = [ad["@id"] for ad in ads]
             new_ads = self.__find_difference(
-                self.__previous_1000_ads, fresh_ads)
+                self.previous_ads, fresh_ads)
 
-            self.__previous_1000_ads.extend(new_ads)
-            self.__previous_1000_ads = self.__previous_1000_ads[len(
-                self.__previous_1000_ads) - 1000:]
+            self.previous_ads.extend(new_ads)
+            self.previous_ads = self.previous_ads[len(
+                self.previous_ads) - 1000:]
 
             for id in new_ads:
 

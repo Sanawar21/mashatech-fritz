@@ -12,7 +12,7 @@ async def main():
     from app.cache import MessageIDCache
     from app.utils import get_chat_id_from_link, setup_logging
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
-    from app.exceptions import InvalidAdException
+    from app.exceptions import InvalidAdException, ConnectionError
 
     setup_logging()
 
@@ -53,7 +53,15 @@ async def main():
         await asyncio.sleep(1)
 
         # send new add offers
-        ads = ka_client.get_fritz_ads()
+        try:
+            ads = ka_client.get_fritz_ads()
+        except ConnectionError:
+            # The client has disconnected so create a new one
+            previous_ads = ka_client.previous_ads
+            ka_client = KleinanzeigenClient()
+            ka_client.previous_ads = previous_ads
+            ads = ka_client.get_fritz_ads()
+
         for ad in ads:
             try:
                 message = SendOfferMessage(ad)

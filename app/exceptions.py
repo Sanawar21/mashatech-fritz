@@ -1,3 +1,5 @@
+from requests.exceptions import ConnectionError
+
 
 class InvalidIncomingMessageException(Exception):
     pass
