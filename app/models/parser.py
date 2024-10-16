@@ -1,11 +1,18 @@
-from ..utils import CATALOG
-from .match import Match
+from ..clients import AirtableClient
+from . import ATProductEntry
+from . import Match
 
 
 class AdParser:
 
     def __init__(self) -> None:
         self.tokens = None
+        self.__catalog = None
+        self.__at_client = AirtableClient()
+        self.update_catalog()
+
+    def __create_catalog_dict(self, products: list[ATProductEntry]) -> dict:
+        return {product.product_name: int(product.price) for product in products}
 
     def __tokenize(self, text: str):
         numbers = "0123456789 "
@@ -22,6 +29,11 @@ class AdParser:
         chunks.extend([x.strip() for x in chunk.split(" ") if x != ""])
         self.tokens = chunks
         return chunks
+
+    def update_catalog(self):
+        results = self.__at_client.read_products_table()
+        self.__catalog = self.__create_catalog_dict(results)
+        del self.__catalog["Universal"]
 
     @staticmethod
     def get_offer_price(matches: list[Match], ad):
@@ -50,7 +62,7 @@ class AdParser:
 
     def find_matches(self, product_title: str, product_description: str) -> list[Match]:
 
-        products = list(CATALOG.keys())
+        products = list(self.__catalog.keys())
         matched_products = []
         matches: list[Match] = []
 
@@ -78,7 +90,8 @@ class AdParser:
         match_amounts = self.__get_match_amounts(matched_products)
 
         for match in match_amounts.keys():
-            matches.append(Match(match, match_amounts[match], CATALOG[match]))
+            matches.append(
+                Match(match, match_amounts[match], self.__catalog[match]))
 
         return matches
 
@@ -123,7 +136,7 @@ class AdParser:
                         "wlan", "fritzpowerline", "cable",
                         "dect", "fritzrepeater", "set",
                         "powerlineadapter", "ax", "e"]
-            keywords.extend(list(CATALOG.keys()))
+            keywords.extend(list(self.__catalog.keys()))
             match_index = tokens.index(match)
             tokens.append(None)  # to prevent index out of range
 

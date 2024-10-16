@@ -1,6 +1,6 @@
 from ..base import OutgoingMessage
-from ...models import Ad, Match
-from ...utils import MESSAGES
+from ...clients import AirtableClient
+from ...models import Ad, Match, ATProductEntry
 from ...exceptions import InvalidAdException
 
 
@@ -17,6 +17,9 @@ class SendOfferMessage(OutgoingMessage):
 
     type_ = 'sendOffer'
 
+    __at_client = AirtableClient()
+    __messages_list = None
+
     def __init__(self, ad: Ad):
 
         if not ad.matches or not ad.offer_price:
@@ -26,20 +29,27 @@ class SendOfferMessage(OutgoingMessage):
         self.link = ad.link
         self.offer_price = ad.offer_price
 
+    @classmethod
+    def update_messages_list(cls):
+        results = cls.__at_client.read_products_table()
+        cls.__messages_list = {
+            product.product_name: product.message for product in results
+        }
+
     def __get_message(self, matches: list[Match]) -> str:
         products = [match.product for match in matches]
         if len(products) == 1:
             product = products[0]
             try:
-                return MESSAGES[product]
+                return self.__messages_list[product]
             except KeyError:
                 pass
         else:
             for product in products:
-                if product in MESSAGES.keys():
-                    return MESSAGES[product]
+                if product in self.__messages_list.keys():
+                    return self.__messages_list[product]
 
-        return MESSAGES["universal"]
+        return self.__messages_list["universal"]
 
     def to_dict(self):
         return {

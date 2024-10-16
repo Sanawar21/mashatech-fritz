@@ -24,26 +24,8 @@ class AirtableClient:
             AT_PRODUCTS_TABLE
         )
 
-        self.__messages = None
-        self.__catalog = None
         self.__cache = AirtableCache()
-
-        self.update_catalog_and_messages()
         self.old_perfect_ids = self.__cache.read_old_perfect_ids()
-
-    def __create_messages_dict(self, products: list[ATProductEntry]) -> dict:
-        return {product.product_name: product.message for product in products}
-
-    def __create_catalog_dict(self, products: list[ATProductEntry]) -> dict:
-        return {product.product_name: int(product.price) for product in products}
-
-    @property
-    def messages(self) -> dict:
-        return self.__messages
-
-    @property
-    def catalog(self) -> dict:
-        return self.__catalog
 
     def read_new_perfects(self) -> list[ATBoughtEntry]:
         results = self.products_bought_table.all(
@@ -58,14 +40,11 @@ class AirtableClient:
             result["fields"]) for result in filtered_results]
         return filtered_results
 
-    def update_catalog_and_messages(self):
-        results = [
+    def read_products_table(self):
+        return [
             ATProductEntry.from_dict(result["fields"])
             for result in self.products_table.all()
         ]
-        self.__messages = self.__create_messages_dict(results)
-        self.__catalog = self.__create_catalog_dict(results)
-        del self.__catalog["Universal"]
 
     def create(self, entry: ATBoughtEntry):
         """
