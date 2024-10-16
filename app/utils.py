@@ -61,7 +61,8 @@ KA_PASSWORD = os.getenv("KA_PASSWORD")
 
 AT_API_KEY = os.getenv("AT_API_KEY")
 AT_BASE_ID = os.getenv("AT_BASE_ID")
-AT_TABLE_NAME = os.getenv("AT_TABLE_NAME")
+AT_PRODUCTS_BOUGHT_TABLE = os.getenv("AT_PRODUCTS_BOUGHT_TABLE")
+AT_PRODUCTS_TABLE = os.getenv("AT_PRODUCTS_TABLE")
 
 CATALOG = {
     "510": 5,

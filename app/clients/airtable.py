@@ -1,5 +1,5 @@
-from ..utils import AT_API_KEY, AT_BASE_ID, AT_TABLE_NAME
-from ..models import ATBoughtEntry
+from ..utils import AT_API_KEY, AT_BASE_ID, AT_PRODUCTS_BOUGHT_TABLE, AT_PRODUCTS_TABLE
+from ..models import ATBoughtEntry, ATProductEntry
 from ..cache import AirtableCache
 
 from pyairtable import Table
@@ -7,19 +7,29 @@ from pyairtable import Table
 import logging
 
 
-class AirtableClient(Table):
+class AirtableClient:
 
-    # column names
-
-    FORMULA = "{Zustand}='Perfekt'"
+    PERFECT_CONDITION_FILTER = "{Zustand}='Perfekt'"
 
     def __init__(self) -> None:
-        super().__init__(AT_API_KEY, AT_BASE_ID, AT_TABLE_NAME)
+        # create airtable table objects
+        self.products_bought_table = Table(
+            AT_API_KEY,
+            AT_BASE_ID,
+            AT_PRODUCTS_BOUGHT_TABLE
+        )
+        self.products_table = Table(
+            AT_API_KEY,
+            AT_BASE_ID,
+            AT_PRODUCTS_TABLE
+        )
+
         self.__cache = AirtableCache()
         self.old_perfect_ids = self.__cache.read_old_perfect_ids()
 
     def read_new_perfects(self) -> list[ATBoughtEntry]:
-        results = self.all(formula=self.FORMULA)
+        results = self.products_bought_table.all(
+            formula=self.PERFECT_CONDITION_FILTER)
         filtered_results = [
             result for result in results if result["id"] not in self.old_perfect_ids]
         self.old_perfect_ids.extend(
@@ -30,12 +40,13 @@ class AirtableClient(Table):
             result["fields"]) for result in filtered_results]
         return filtered_results
 
-    def read_prdoucts_sheet(self):
-        pass
+    def read_products_sheet(self):
+        results = self.products_table.all()
+        return [ATProductEntry.from_dict(result["fields"]) for result in results]
 
     def create(self, entry: ATBoughtEntry):
         """
         Create a new entry in the Airtable database.
         """
         logging.info(f"Creating new entry in Airtable for {entry.ad_uid}")
-        return super().create(entry.to_dict())
+        return self.products_bought_table.create(entry.to_dict())
