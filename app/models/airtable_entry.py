@@ -1,9 +1,43 @@
 from .ad import Ad, Match
 
 
+class ATProductEntry:
+    """
+    ATProductEntry represents a single entry in the Airtable products list
+    which contains the prices, custom messages affiliated with each product and 
+    whether the product is to be ignored or not.
+
+        Attributes:
+        product_name (str): The name of the product.
+        price (int): The price of the product.
+        message (str): The custom message affiliated with the product.
+        is_enabled (bool): Whether the product is to be ignored or not.
+    """
+    # Airtable column names
+    PRODUCT_NAME = "Name"
+    PRICE = "Price"
+    MESSAGE = "Message"
+    IS_ENABLED = "isEnabled"
+
+    def __init__(self, product_name, price, message, is_enabled):
+        self.product_name = product_name
+        self.price = price
+        self.message = message
+        self.is_enabled = is_enabled
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            data.get(cls.PRODUCT_NAME),
+            data.get(cls.PRICE),
+            data.get(cls.MESSAGE),
+            data.get(cls.IS_ENABLED)
+        )
+
+
 class ATBoughtEntry:
     """
-    ATBoughtEntry represents a single entry in the Airtable database.
+    ATBoughtEntry represents a single entry in the Airtable products bought table.
 
         Attributes:        
         ad_uid (str): The unique identifier of the ad.
