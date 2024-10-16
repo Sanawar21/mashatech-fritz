@@ -1,14 +1,18 @@
 from .ad import Ad, Match
 
 
-class AirtableEntry:
+class ATBoughtEntry:
     """
-    AirtableEntry represents a single entry in the Airtable database.
+    ATBoughtEntry represents a single entry in the Airtable database.
 
         Attributes:        
-        ad: Ad (Ad object)
-        chat_link: str (Link to the chat of the ad)
-
+        ad_uid (str): The unique identifier of the ad.
+        date (str): The date the ad was posted.
+        matches (list[Match]): The list of products matched in the ad.
+        cost (str): The price of the ad.
+        poster_name (str): The name of the poster.
+        postal_code (str): The postal code of the poster.
+        chat_link (str): The link to the chat with the poster.
     """
     # Airtable column names
     AD_UID = "Ad UID"

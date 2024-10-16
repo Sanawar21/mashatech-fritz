@@ -2,7 +2,7 @@ from ..base import IncomingMessage
 from ...cache import MessageIDCache
 from ...clients import TelegramClient, AirtableClient, KleinanzeigenClient
 from ...exceptions import InvalidOfferStatusException
-from ...models import AirtableEntry
+from ...models import ATBoughtEntry
 from ..outgoing import DeleteOfferMessage
 from ...utils import get_chat_id_from_link, get_ad_id_from_link
 
@@ -58,7 +58,7 @@ class OfferStatusAlertMessage(IncomingMessage):
             ad_uid = get_ad_id_from_link(self.ad_link)
             self.__cache.update_status(self.message_id, "paid")
             ad = self.__kleinanzeigen.get_ad(ad_uid)
-            entry = AirtableEntry.from_ad(ad, self.chat_link)
+            entry = ATBoughtEntry.from_ad(ad, self.chat_link)
             self.__airtable.create(entry)
 
         elif self.status == "pending":

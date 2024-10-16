@@ -1,3 +1,3 @@
-from .airtable import AirtableClient, AirtableEntry
+from .airtable import AirtableClient, ATBoughtEntry
 from .kleinanzeigen import KleinanzeigenClient
 from .telegram import TelegramClient
