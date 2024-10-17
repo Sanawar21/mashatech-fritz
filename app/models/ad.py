@@ -1,6 +1,6 @@
-from .parser import AdParser
 from .match import Match
 from datetime import datetime
+from .parser import AdParser
 
 
 class Ad:

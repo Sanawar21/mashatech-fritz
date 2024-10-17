@@ -1,5 +1,4 @@
 from ..utils import AT_API_KEY, AT_BASE_ID, AT_PRODUCTS_BOUGHT_TABLE, AT_PRODUCTS_TABLE
-from ..models import ATBoughtEntry, ATProductEntry
 from ..cache import AirtableCache
 
 from pyairtable import Table
@@ -27,7 +26,9 @@ class AirtableClient:
         self.__cache = AirtableCache()
         self.old_perfect_ids = self.__cache.read_old_perfect_ids()
 
-    def read_new_perfects(self) -> list[ATBoughtEntry]:
+    def read_new_perfects(self):
+        from ..models.airtable_entry import ATBoughtEntry  # prevent circular import
+
         results = self.products_bought_table.all(
             formula=self.PERFECT_CONDITION_FILTER)
         filtered_results = [
@@ -41,12 +42,13 @@ class AirtableClient:
         return filtered_results
 
     def read_products_table(self):
+        from ..models.airtable_entry import ATProductEntry  # prevent circular import
         return [
             ATProductEntry.from_dict(result["fields"])
             for result in self.products_table.all()
         ]
 
-    def create(self, entry: ATBoughtEntry):
+    def create(self, entry):
         """
         Create a new entry in the Airtable database.
         """

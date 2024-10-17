@@ -1,4 +1,4 @@
-from .ad import Ad, Match
+from .match import Match
 
 
 class ATProductEntry:
@@ -68,7 +68,7 @@ class ATBoughtEntry:
         self.chat_link = chat_link
 
     @classmethod
-    def from_ad(cls, ad: Ad, chat_link: str):
+    def from_ad(cls, ad, chat_link: str):
         return cls(
             ad.uid,
             ad.date,

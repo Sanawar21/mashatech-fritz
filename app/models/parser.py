@@ -1,18 +1,13 @@
-from ..clients import AirtableClient
-from . import ATProductEntry
-from . import Match
+from .match import Match
+from .catalog_state import CatalogState
 
 
 class AdParser:
 
+    __state = CatalogState()
+
     def __init__(self) -> None:
         self.tokens = None
-        self.__catalog = None
-        self.__at_client = AirtableClient()
-        self.update_catalog()
-
-    def __create_catalog_dict(self, products: list[ATProductEntry]) -> dict:
-        return {product.product_name: int(product.price) for product in products}
 
     def __tokenize(self, text: str):
         numbers = "0123456789 "
@@ -29,11 +24,6 @@ class AdParser:
         chunks.extend([x.strip() for x in chunk.split(" ") if x != ""])
         self.tokens = chunks
         return chunks
-
-    def update_catalog(self):
-        results = self.__at_client.read_products_table()
-        self.__catalog = self.__create_catalog_dict(results)
-        del self.__catalog["Universal"]
 
     @staticmethod
     def get_offer_price(matches: list[Match], ad):
@@ -62,7 +52,7 @@ class AdParser:
 
     def find_matches(self, product_title: str, product_description: str) -> list[Match]:
 
-        products = list(self.__catalog.keys())
+        products = list(self.__state.products_catalog.keys())
         matched_products = []
         matches: list[Match] = []
 
@@ -91,7 +81,7 @@ class AdParser:
 
         for match in match_amounts.keys():
             matches.append(
-                Match(match, match_amounts[match], self.__catalog[match]))
+                Match(match, match_amounts[match], self.__state.products_catalog[match]))
 
         return matches
 
@@ -136,7 +126,7 @@ class AdParser:
                         "wlan", "fritzpowerline", "cable",
                         "dect", "fritzrepeater", "set",
                         "powerlineadapter", "ax", "e"]
-            keywords.extend(list(self.__catalog.keys()))
+            keywords.extend(list(self.__state.products_catalog.keys()))
             match_index = tokens.index(match)
             tokens.append(None)  # to prevent index out of range
 
