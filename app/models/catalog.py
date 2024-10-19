@@ -1,4 +1,6 @@
+import logging
 from pyairtable import Table
+
 from ..utils import AT_CATALOG_NAME, AT_BASE_ID, AT_API_KEY
 
 
@@ -79,6 +81,7 @@ class Catalog:
         return False
 
     def refresh(self):
+        logging.info("Refreshing catalog...")
         Catalog.__entries = [
             self.CatalogEntry.from_dict(result["fields"])
             for result in self.__table.all()

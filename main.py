@@ -8,7 +8,7 @@ from datetime import datetime
 async def main():
     from app.clients import KleinanzeigenClient, TelegramClient, AirtableClient
     from app.server import WebSocketServer
-    from app.models import Counter
+    from app.models import Counter, Catalog
     from app.cache import MessageIDCache
     from app.utils import get_chat_id_from_link, setup_logging
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
@@ -21,16 +21,18 @@ async def main():
     at_client = AirtableClient()
     msg_cache = MessageIDCache()
     server = WebSocketServer('0.0.0.0', 8765)
+    catalog = Catalog()
 
     pending_msgs_queue = queue.Queue()  # Contains SendOfferMessage s
     offers_sent = 0
 
-    # # initialize counters
+    # initialize counters
     status_check_counter = Counter(0, 5, 0)
     offers_reset_counter = Counter(1, 0, 0)
     pending_deletion_counter = Counter(48, 0, 0)
     accepted_deletion_counter = Counter(24, 0, 0)
     self_connect_counter = Counter(0, 5, 0)
+    catalog_refresh_counter = Counter(0, 5, 0)
 
     await server.start()
     logging.info(f"Server started at {server.public_address}")
@@ -41,6 +43,7 @@ async def main():
     pending_deletion_counter.start()
     accepted_deletion_counter.start()
     self_connect_counter.start()
+    catalog_refresh_counter.start()
 
     while True:
 
@@ -49,6 +52,10 @@ async def main():
         if self_connect_counter.is_finished():
             await server.self_connect()
             self_connect_counter.restart()
+
+        if catalog_refresh_counter.is_finished():
+            catalog.refresh()
+            catalog_refresh_counter.restart()
 
         await asyncio.sleep(1)
 
