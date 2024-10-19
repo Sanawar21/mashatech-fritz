@@ -62,8 +62,9 @@ async def main():
         # send new add offers
         try:
             ads = ka_client.get_fritz_ads()
-        except ConnectionError:
+        except Exception as e:
             # The client has disconnected so create a new one
+            logging.error(f"Error: {e}", exc_info=True)
             previous_ads = ka_client.previous_ads
             ka_client = KleinanzeigenClient()
             ka_client.previous_ads = previous_ads
