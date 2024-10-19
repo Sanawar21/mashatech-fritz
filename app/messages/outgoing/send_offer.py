@@ -1,6 +1,5 @@
 from ..base import OutgoingMessage
-from ...models import Ad, Match
-from ...utils import MESSAGES
+from ...models import Ad, Match, Catalog
 from ...exceptions import InvalidAdException
 
 
@@ -25,21 +24,23 @@ class SendOfferMessage(OutgoingMessage):
         self.message = self.__get_message(ad.matches)
         self.link = ad.link
         self.offer_price = ad.offer_price
+        self.__catalog = Catalog()
 
     def __get_message(self, matches: list[Match]) -> str:
         products = [match.product for match in matches]
+        messages = self.__catalog.messages
         if len(products) == 1:
             product = products[0]
             try:
-                return MESSAGES[product]
+                return messages[product]
             except KeyError:
                 pass
         else:
             for product in products:
-                if product in MESSAGES.keys():
-                    return MESSAGES[product]
+                if product in messages.keys():
+                    return messages[product]
 
-        return MESSAGES["universal"]
+        return messages["universal"]
 
     def to_dict(self):
         return {

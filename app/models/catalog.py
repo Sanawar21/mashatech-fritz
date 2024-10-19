@@ -48,10 +48,13 @@ class Catalog:
             )
 
     __entries = []
+    __is_initialized = False
 
     def __init__(self):
         self.__table = Table(AT_API_KEY, AT_BASE_ID, AT_CATALOG_NAME)
-        self.refresh()
+        if Catalog.__is_initialized is False:
+            self.refresh()
+            Catalog.__is_initialized = True
 
     @property
     def messages(self):

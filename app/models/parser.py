@@ -1,11 +1,12 @@
-from ..utils import CATALOG
 from .match import Match
+from .catalog import Catalog
 
 
 class AdParser:
 
     def __init__(self) -> None:
         self.tokens = None
+        self.__catalog = Catalog()
 
     def __tokenize(self, text: str):
         numbers = "0123456789 "
@@ -49,8 +50,8 @@ class AdParser:
             return False
 
     def find_matches(self, product_title: str, product_description: str) -> list[Match]:
-
-        products = list(CATALOG.keys())
+        prices = self.__catalog.prices
+        products = list(prices.keys())
         matched_products = []
         matches: list[Match] = []
 
@@ -78,7 +79,7 @@ class AdParser:
         match_amounts = self.__get_match_amounts(matched_products)
 
         for match in match_amounts.keys():
-            matches.append(Match(match, match_amounts[match], CATALOG[match]))
+            matches.append(Match(match, match_amounts[match], prices[match]))
 
         return matches
 
@@ -123,7 +124,7 @@ class AdParser:
                         "wlan", "fritzpowerline", "cable",
                         "dect", "fritzrepeater", "set",
                         "powerlineadapter", "ax", "e"]
-            keywords.extend(list(CATALOG.keys()))
+            keywords.extend(list(self.__catalog.prices.keys()))
             match_index = tokens.index(match)
             tokens.append(None)  # to prevent index out of range
 
