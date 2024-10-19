@@ -3,6 +3,17 @@ from ..utils import AT_CATALOG_NAME, AT_BASE_ID, AT_API_KEY
 
 
 class Catalog:
+    """
+    Catalog provides access to the products catalog in the Airtable database.
+    Usage:
+    catalog = Catalog()
+    print(catalog.messages) # {'510': 'Message 1', '520': 'Message 2', ...}
+    print(catalog.prices) # {'510': 5, '520': 10, ...}
+    print(catalog.is_enabled("510")) # True
+    catalog.refresh() # Refresh the catalog from the Airtable database.
+
+    Catalog().refresh changes the messages and prices across all instances of the Catalog class.
+    """
     class CatalogEntry:
         """
         CatalogEntry represents a single entry in the Airtable products list
@@ -36,9 +47,10 @@ class Catalog:
                 data.get(cls.IS_ENABLED)
             )
 
+    __entries = []
+
     def __init__(self):
         self.__table = Table(AT_API_KEY, AT_BASE_ID, AT_CATALOG_NAME)
-        self.__entries: list[Catalog.CatalogEntry] = []
         self.refresh()
 
     @property
@@ -50,7 +62,7 @@ class Catalog:
         }
 
     @property
-    def catalog(self):
+    def prices(self):
         return {
             product.name: int(product.price)
             for product in self.__entries
@@ -64,7 +76,7 @@ class Catalog:
         return False
 
     def refresh(self):
-        self.__entries =  [
+        Catalog.__entries = [
             self.CatalogEntry.from_dict(result["fields"])
             for result in self.__table.all()
         ]
