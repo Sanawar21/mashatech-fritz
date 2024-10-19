@@ -17,14 +17,15 @@ class SendOfferMessage(OutgoingMessage):
     type_ = 'sendOffer'
 
     def __init__(self, ad: Ad):
+        self.__catalog = Catalog()
 
-        if not ad.matches or not ad.offer_price:
+        if not ad.matches or not ad.offer_price or \
+                not all([self.__catalog.is_enabled(match.product) for match in ad.matches]):
             raise InvalidAdException
 
         self.message = self.__get_message(ad.matches)
         self.link = ad.link
         self.offer_price = ad.offer_price
-        self.__catalog = Catalog()
 
     def __get_message(self, matches: list[Match]) -> str:
         products = [match.product for match in matches]
