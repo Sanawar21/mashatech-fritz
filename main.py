@@ -6,15 +6,15 @@ from datetime import datetime
 
 
 async def main():
+    from app.utils import get_chat_id_from_link, setup_logging
+    setup_logging()  # prevents the overriden logging.basicConfig from being called
+
     from app.clients import KleinanzeigenClient, TelegramClient, AirtableClient
     from app.server import WebSocketServer
     from app.models import Counter, Catalog
     from app.cache import MessageIDCache
-    from app.utils import get_chat_id_from_link, setup_logging
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
     from app.exceptions import InvalidAdException
-
-    setup_logging()
 
     ka_client = KleinanzeigenClient()
     tg_client = TelegramClient()
