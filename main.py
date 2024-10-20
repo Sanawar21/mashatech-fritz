@@ -12,7 +12,7 @@ async def main():
     from app.cache import MessageIDCache
     from app.utils import get_chat_id_from_link, setup_logging
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
-    from app.exceptions import InvalidAdException, ConnectionError
+    from app.exceptions import InvalidAdException
 
     setup_logging()
 
@@ -64,7 +64,8 @@ async def main():
             ads = ka_client.get_fritz_ads()
         except Exception as e:
             # The client has disconnected so create a new one
-            logging.error(f"Error: {e}", exc_info=True)
+            logging.info(
+                f"Client disconnected: {e.with_traceback()}", exc_info=True)
             previous_ads = ka_client.previous_ads
             ka_client = KleinanzeigenClient()
             ka_client.previous_ads = previous_ads
