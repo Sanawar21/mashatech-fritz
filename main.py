@@ -65,7 +65,7 @@ async def main():
         except Exception as e:
             # The client has disconnected so create a new one
             logging.info(
-                f"Client disconnected: {e.with_traceback()}", exc_info=True)
+                f"Client disconnected: {e}", exc_info=True)
             previous_ads = ka_client.previous_ads
             ka_client = KleinanzeigenClient()
             ka_client.previous_ads = previous_ads
