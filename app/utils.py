@@ -58,6 +58,8 @@ TG_API_ENDPOINT = f"https://api.telegram.org/bot{TG_BOT_TOKEN}"
 
 KA_USERNAME = os.getenv("KA_USERNAME")
 KA_PASSWORD = os.getenv("KA_PASSWORD")
+KA_USER_ID = os.getenv("KA_USER_ID")
+KA_USER_TOKEN = os.getenv("KA_USER_TOKEN")
 
 AT_API_KEY = os.getenv("AT_API_KEY")
 AT_BASE_ID = os.getenv("AT_BASE_ID")
