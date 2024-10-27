@@ -50,7 +50,14 @@ async def main():
         msg_cache.refresh()
 
         if self_connect_counter.is_finished():
-            await server.self_connect()
+            try:
+                await server.self_connect()
+            except TimeoutError:
+                logging.error("Unable to connect to server, restarting")
+                # restart server
+                await server.stop()
+                await server.start()
+
             self_connect_counter.restart()
 
         if catalog_refresh_counter.is_finished():
