@@ -1,8 +1,17 @@
 import asyncio
 import queue
 import logging
-
 from datetime import datetime
+
+
+async def main_loop():
+    while True:
+        try:
+            await main()
+        except Exception as e:
+            logging.error(f"Unexpected error in main loop: {e}", exc_info=True)
+            # Optionally, add a short delay before restarting to prevent rapid restart loops
+            await asyncio.sleep(5)
 
 
 async def main():
@@ -26,7 +35,7 @@ async def main():
     pending_msgs_queue = queue.Queue()  # Contains SendOfferMessage s
     offers_sent = 0
 
-    # initialize counters
+    # Initialize counters
     status_check_counter = Counter(0, 5, 0)
     offers_reset_counter = Counter(1, 0, 0)
     pending_deletion_counter = Counter(48, 0, 0)
@@ -37,7 +46,7 @@ async def main():
     await server.start()
     logging.info(f"Server started at {server.public_address}")
 
-    # start counters
+    # Start counters
     offers_reset_counter.start()
     status_check_counter.start()
     pending_deletion_counter.start()
@@ -46,108 +55,107 @@ async def main():
     catalog_refresh_counter.start()
 
     while True:
-
-        msg_cache.refresh()
-
-        if self_connect_counter.is_finished():
-            try:
-                await server.self_connect()
-            except TimeoutError:
-                logging.error("Unable to connect to server, restarting")
-                # restart server
-                await server.stop()
-                await server.start()
-
-            self_connect_counter.restart()
-
-        if catalog_refresh_counter.is_finished():
-            catalog.refresh()
-            catalog_refresh_counter.restart()
-
-        await asyncio.sleep(1)
-
-        # send new add offers
         try:
-            ads = ka_client.get_fritz_ads()
-        except Exception as e:
-            # The client has disconnected so create a new one
-            logging.info(
-                f"Client disconnected: {e}", exc_info=True)
-            previous_ads = ka_client.previous_ads
-            ka_client = KleinanzeigenClient()
-            ka_client.previous_ads = previous_ads
-            ads = ka_client.get_fritz_ads()
+            msg_cache.refresh()
 
-        for ad in ads:
+            if self_connect_counter.is_finished():
+                try:
+                    await server.self_connect()
+                except TimeoutError:
+                    logging.error("Unable to connect to server, restarting")
+                    await server.stop()
+                    await server.start()
+                self_connect_counter.restart()
+
+            if catalog_refresh_counter.is_finished():
+                catalog.refresh()
+                catalog_refresh_counter.restart()
+
+            await asyncio.sleep(1)
+
+            # Send new ads offers
             try:
-                message = SendOfferMessage(ad)
-            except InvalidAdException:
-                continue
+                ads = ka_client.get_fritz_ads()
+            except Exception as e:
+                logging.info(f"Client disconnected: {e}", exc_info=True)
+                previous_ads = ka_client.previous_ads
+                ka_client = KleinanzeigenClient()
+                ka_client.previous_ads = previous_ads
+                ads = ka_client.get_fritz_ads()
 
-            if offers_sent <= 50:
-                logging.info(f"Sending offer to {ad.uid}")
-                await server.send_message(message)
-                tg_client.send_ad_alert(ad)
-                offers_sent += 1
-            else:
-                logging.info(f"Putting {ad.uid} in queue")
-                pending_msgs_queue.put(message)
+            for ad in ads:
+                try:
+                    message = SendOfferMessage(ad)
+                except InvalidAdException:
+                    continue
 
-        # send pending offers
-        while not pending_msgs_queue.empty() and offers_sent <= 50:
-            message = pending_msgs_queue.get()
-            logging.info(f"Sending offer to {message.link} (from queue)")
-            tg_client.send_ad_alert(ad)
-            await server.send_message(message)
-            offers_sent += 1
-
-        # reset offers sent counter
-        if offers_reset_counter.is_finished():
-            offers_sent = 0
-            offers_reset_counter.restart()
-
-        # check status of offers
-        if status_check_counter.is_finished():
-            cached_ids = msg_cache.read_n_day_old(2)
-            for id_ in cached_ids:
-                if id_.status != "paid":
-                    logging.info(
-                        f"Sending status check message for {id_.message_id}")
-                    message = CheckOfferStatusMessage(id_.message_id)
+                if offers_sent <= 50:
+                    logging.info(f"Sending offer to {ad.uid}")
                     await server.send_message(message)
-            status_check_counter.restart()
+                    tg_client.send_ad_alert(ad)
+                    offers_sent += 1
+                else:
+                    logging.info(f"Putting {ad.uid} in queue")
+                    pending_msgs_queue.put(message)
 
-        # deletion of pending offers
-        if pending_deletion_counter.is_finished():
-            pending_offers = msg_cache.read_n_day_old(2, "pending")
-            for offer in pending_offers:
-                logging.info(
-                    f"Sending delete offer message for {offer.ad_uid} (pending)")
-                message = DeleteOfferMessage(offer.message_id)
-                msg_cache.delete(offer.message_id)
+            # Send pending offers
+            while not pending_msgs_queue.empty() and offers_sent <= 50:
+                message = pending_msgs_queue.get()
+                logging.info(f"Sending offer to {message.link} (from queue)")
+                tg_client.send_ad_alert(ad)
                 await server.send_message(message)
-            pending_deletion_counter.restart()
+                offers_sent += 1
 
-        # deletion of accepted offers that are not paid
-        if accepted_deletion_counter.is_finished():
-            accepted_offers = msg_cache.read_n_day_old(1, "accepted")
-            for offer in accepted_offers:
-                logging.info(
-                    f"Sending delete offer message for {offer.ad_uid} (accepted)")
+            # Reset offers sent counter
+            if offers_reset_counter.is_finished():
+                offers_sent = 0
+                offers_reset_counter.restart()
 
-                message = DeleteOfferMessage(offer.message_id)
-                msg_cache.delete(offer.message_id)
-                await server.send_message(message)
-            accepted_deletion_counter.restart()
+            # Check status of offers
+            if status_check_counter.is_finished():
+                cached_ids = msg_cache.read_n_day_old(2)
+                for id_ in cached_ids:
+                    if id_.status != "paid":
+                        logging.info(
+                            f"Sending status check message for {id_.message_id}")
+                        message = CheckOfferStatusMessage(id_.message_id)
+                        await server.send_message(message)
+                status_check_counter.restart()
 
-        # release payments
-        if datetime.now().hour == 0:
-            perfect_entries = at_client.read_new_perfects()
-            for entry in perfect_entries:
-                logging.info(f"Releasing payment for {entry.ad_uid}")
-                message_id = get_chat_id_from_link(entry.chat_link)
-                message = ReleasePaymentMessage(message_id)
-                await server.send_message(message)
+            # Deletion of pending offers
+            if pending_deletion_counter.is_finished():
+                pending_offers = msg_cache.read_n_day_old(2, "pending")
+                for offer in pending_offers:
+                    logging.info(
+                        f"Sending delete offer message for {offer.ad_uid} (pending)")
+                    message = DeleteOfferMessage(offer.message_id)
+                    msg_cache.delete(offer.message_id)
+                    await server.send_message(message)
+                pending_deletion_counter.restart()
+
+            # Deletion of accepted offers that are not paid
+            if accepted_deletion_counter.is_finished():
+                accepted_offers = msg_cache.read_n_day_old(1, "accepted")
+                for offer in accepted_offers:
+                    logging.info(
+                        f"Sending delete offer message for {offer.ad_uid} (accepted)")
+                    message = DeleteOfferMessage(offer.message_id)
+                    msg_cache.delete(offer.message_id)
+                    await server.send_message(message)
+                accepted_deletion_counter.restart()
+
+            # Release payments
+            if datetime.now().hour == 0:
+                perfect_entries = at_client.read_new_perfects()
+                for entry in perfect_entries:
+                    logging.info(f"Releasing payment for {entry.ad_uid}")
+                    message_id = get_chat_id_from_link(entry.chat_link)
+                    message = ReleasePaymentMessage(message_id)
+                    await server.send_message(message)
+
+        except Exception as e:
+            logging.error(f"Error in main loop: {e}", exc_info=True)
+            await asyncio.sleep(1)  # Delay to prevent rapid error cycling
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main_loop())
