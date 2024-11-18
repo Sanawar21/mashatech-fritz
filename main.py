@@ -34,6 +34,7 @@ async def main():
 
     pending_msgs_queue = queue.Queue()  # Contains SendOfferMessage s
     offers_sent = 0
+    MAX_OFFERS_PER_HOUR = 40
 
     # Initialize counters
     status_check_counter = Counter(0, 5, 0)
@@ -99,7 +100,7 @@ async def main():
                     pending_msgs_queue.put(message)
 
             # Send pending offers
-            while not pending_msgs_queue.empty() and offers_sent <= 50:
+            while not pending_msgs_queue.empty() and offers_sent <= MAX_OFFERS_PER_HOUR:
                 message = pending_msgs_queue.get()
                 logging.info(f"Sending offer to {message.link} (from queue)")
                 tg_client.send_ad_alert(ad)

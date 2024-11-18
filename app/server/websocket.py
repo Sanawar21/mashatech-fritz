@@ -5,7 +5,7 @@ import logging
 
 from ..messages import MessageFactory
 from ..messages.base import OutgoingMessage
-from ..exceptions import InvalidIncomingMessageException
+from ..exceptions import InvalidIncomingMessageException, InvalidOfferStatusException
 
 
 class WebSocketServer:
@@ -39,7 +39,11 @@ class WebSocketServer:
                 except InvalidIncomingMessageException:
                     logging.info(f"Invalid incoming message: {message}")
                     continue
-                message.process()
+                try:
+                    message.process()
+                except InvalidOfferStatusException:
+                    logging.info(
+                        f"Error: Invalid offer status. Message: {message}")
                 if message.response:
                     await self.send_message(message.response)
 
@@ -70,7 +74,7 @@ class WebSocketServer:
 
     async def self_connect(self):
         """
-        fix for an uncertain bug where the server stops sending messages until a new client connects. 
+        fix for an uncertain bug where the server stops sending messages until a new client connects.
         """
         if self.is_running:
             async with websockets.connect(self.public_address):
