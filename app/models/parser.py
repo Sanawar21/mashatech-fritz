@@ -1,6 +1,8 @@
 from .match import Match
 from .catalog import Catalog
 
+import logging
+
 
 class AdParser:
 
@@ -33,7 +35,19 @@ class AdParser:
         account is not new return the offer price else return False
         """
 
-        if ad.account_age <= 7 or ad.is_damaged or ad.is_only_pickup or not ad.price or not ad.is_buy_now_available:
+        # or not ad.is_buy_now_available: (This check was removed)
+
+        if ad.account_age <= 7:
+            logging.info(f"Ad rejected. Account age too low: {ad.account_age}")
+            return False
+        elif ad.is_damaged:
+            logging.info(f"Ad rejected. Damaged: {ad.is_damaged}")
+            return False
+        elif ad.is_only_pickup:
+            logging.info(f"Ad rejected. Pickup only: {ad.is_only_pickup}")
+            return False
+        elif not ad.price:
+            logging.info(f"Ad rejected. No price: {ad.price}")
             return False
 
         estimated_price = sum(
@@ -47,6 +61,8 @@ class AdParser:
             else:
                 return estimated_price
         else:
+            logging.info(
+                f"Ad rejected. Price too high: {ad.price} (Reasonable price: {estimated_price})")
             return False
 
     def find_matches(self, product_title: str, product_description: str) -> list[Match]:
