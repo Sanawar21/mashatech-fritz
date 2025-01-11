@@ -77,5 +77,5 @@ class WebSocketServer:
         fix for an uncertain bug where the server stops sending messages until a new client connects.
         """
         if self.is_running:
-            async with websockets.connect(self.public_address):
+            async with websockets.connect(f"ws://{self.host}:{self.port}"):
                 await asyncio.sleep(15)
