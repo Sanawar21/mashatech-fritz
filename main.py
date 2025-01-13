@@ -60,7 +60,7 @@ async def main():
 
             if self_connect_counter.is_finished():
                 try:
-                    await asyncio.wait_for(server.self_connect(), timeout=10)
+                    await server.self_connect()
                 except TimeoutError:
                     logging.error("Unable to connect to server, restarting")
                     await server.stop()
