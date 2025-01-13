@@ -4,6 +4,15 @@ from datetime import datetime
 from asyncio import Queue, TimeoutError
 
 
+async def log_pending_tasks():
+    while True:
+        tasks = asyncio.all_tasks()
+        logging.info("Pending tasks:")
+        for task in tasks:
+            logging.info(task)
+        await asyncio.sleep(5)
+
+
 async def main_loop():
     while True:
         try:
@@ -53,6 +62,9 @@ async def main():
     accepted_deletion_counter.start()
     self_connect_counter.start()
     catalog_refresh_counter.start()
+
+    # Start task logging in the background
+    asyncio.create_task(log_pending_tasks())
 
     while True:
         try:
