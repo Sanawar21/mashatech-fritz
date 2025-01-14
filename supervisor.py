@@ -15,8 +15,6 @@ async def ping_server(uri):
             try:
                 await websocket.send('{"type": "keepAlive", "sendReply": true}')
                 response = await websocket.recv()
-                if response != '{"type": "pong"}':
-                    raise websockets.exceptions.ConnectionClosedError
                 await asyncio.sleep(5)  # Ping every 5 seconds
             except (websockets.exceptions.ConnectionClosedError, asyncio.TimeoutError):
                 logging.error("No response from server, restarting main.py")
