@@ -13,7 +13,8 @@ class KeepAliveMessage(IncomingMessage):
     @classmethod
     def from_dict(cls, data: dict):
         if data.get('sendReply', False):
-            return cls()
+            obj = cls()
+            obj.send_reply = True
         else:
             obj = cls()
             obj.send_reply = False

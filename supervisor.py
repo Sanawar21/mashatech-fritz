@@ -23,11 +23,13 @@ async def ping_server(uri):
 
 
 async def supervisor():
-    while True:
-        # Start main.py
-        process = subprocess.Popen(["python3", "main.py"])
-        logging.info("Started main.py")
 
+    # Start main.py
+    process = subprocess.Popen(["python3", "main.py"])
+    logging.info("Started main.py")
+
+    while True:
+        await asyncio.sleep(1)
         # Run WebSocket client
         server_running = await ping_server("ws://localhost:8765")
 
