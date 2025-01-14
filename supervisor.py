@@ -34,6 +34,8 @@ async def supervisor():
     process = subprocess.Popen(["python3", "main.py"])
     logging.info("Started main.py")
 
+    asyncio.sleep(10)  # Wait for main.py to start
+
     while True:
         await asyncio.sleep(1)
         # Run WebSocket client
