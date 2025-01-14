@@ -12,12 +12,9 @@ class KeepAliveMessage(IncomingMessage):
 
     @classmethod
     def from_dict(cls, data: dict):
-        if data.get('sendReply', False):
-            obj = cls()
-            obj.send_reply = True
-        else:
-            obj = cls()
-            obj.send_reply = False
+        obj = cls()
+        obj.send_reply = data.get('sendReply', False)
+        return obj
 
     def process(self):
         if self.send_reply:
