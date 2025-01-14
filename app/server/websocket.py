@@ -46,7 +46,7 @@ class WebSocketServer:
                         f"Error: Invalid offer status. Message: {message}")
                 if message.response:
                     if message.type_ == "keepAlive":
-                        await websocket.send(message.response)
+                        await websocket.send(message.response.to_json())
                     else:
                         await self.send_message(message.response)
 
