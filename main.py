@@ -1,5 +1,5 @@
 import asyncio
-import queue
+import argparse
 import logging
 from datetime import datetime
 
@@ -20,57 +20,52 @@ async def main():
 
     from app.clients import KleinanzeigenClient, TelegramClient, AirtableClient
     from app.server import WebSocketServer
-    from app.models import Counter, Catalog
+    from app.models import Catalog, State
     from app.cache import MessageIDCache
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
     from app.exceptions import InvalidAdException
 
+    parser = argparse.ArgumentParser(description='Process some flags.')
+    parser.add_argument('--load-state', action='store_true',
+                        help='Load state from file')
+    args = parser.parse_args()
+
+    if args.load_state:
+        try:
+            with open("data/state.json", "r") as f:
+                state = State.from_file(f)
+        except FileNotFoundError:
+            state = State.new()
+    else:
+        state = State.new()
+
     ka_client = KleinanzeigenClient()
+    ka_client.previous_ads = state.kl_prev_ads
+
     tg_client = TelegramClient()
     at_client = AirtableClient()
     msg_cache = MessageIDCache()
     server = WebSocketServer('localhost', 8765)
     catalog = Catalog()
 
-    pending_msgs_queue = queue.Queue()  # Contains SendOfferMessage s
-    offers_sent = 0
     MAX_OFFERS_PER_HOUR = 40
-
-    # Initialize counters
-    status_check_counter = Counter(0, 5, 0)
-    offers_reset_counter = Counter(1, 0, 0)
-    pending_deletion_counter = Counter(48, 0, 0)
-    accepted_deletion_counter = Counter(24, 0, 0)
-    self_connect_counter = Counter(0, 5, 0)
-    catalog_refresh_counter = Counter(0, 5, 0)
 
     await server.start()
     logging.info(f"Server started at {server.public_address}")
 
     # Start counters
-    offers_reset_counter.start()
-    status_check_counter.start()
-    pending_deletion_counter.start()
-    accepted_deletion_counter.start()
-    self_connect_counter.start()
-    catalog_refresh_counter.start()
+    state.start_counters()
 
     while True:
         try:
+            with open("data/state.json", "w") as f:
+                state.save(f)
+
             msg_cache.refresh()
 
-            if self_connect_counter.is_finished():
-                try:
-                    await server.self_connect()
-                except TimeoutError:
-                    logging.error("Unable to connect to server, restarting")
-                    await server.stop()
-                    await server.start()
-                self_connect_counter.restart()
-
-            if catalog_refresh_counter.is_finished():
+            if state.catalog_refresh_counter.is_finished():
                 catalog.refresh()
-                catalog_refresh_counter.restart()
+                state.catalog_refresh_counter.restart()
 
             await asyncio.sleep(1)
 
@@ -90,30 +85,30 @@ async def main():
                 except InvalidAdException:
                     continue
 
-                if offers_sent <= 50:
+                if state.offers_sent_count <= 50:
                     logging.info(f"Sending offer to {ad.uid}")
                     await server.send_message(message)
                     tg_client.send_ad_alert(ad)
-                    offers_sent += 1
+                    state.offers_sent_count += 1
                 else:
                     logging.info(f"Putting {ad.uid} in queue")
-                    pending_msgs_queue.put(message)
+                    state.pending_msgs_queue.put(message)
 
             # Send pending offers
-            while not pending_msgs_queue.empty() and offers_sent <= MAX_OFFERS_PER_HOUR:
-                message = pending_msgs_queue.get()
+            while not state.pending_msgs_queue.empty() and state.offers_sent_count <= MAX_OFFERS_PER_HOUR:
+                message = state.pending_msgs_queue.get()
                 logging.info(f"Sending offer to {message.link} (from queue)")
                 tg_client.send_ad_alert(ad)
                 await server.send_message(message)
-                offers_sent += 1
+                state.offers_sent_count += 1
 
             # Reset offers sent counter
-            if offers_reset_counter.is_finished():
-                offers_sent = 0
-                offers_reset_counter.restart()
+            if state.offers_reset_counter.is_finished():
+                state.offers_sent_count = 0
+                state.offers_reset_counter.restart()
 
             # Check status of offers
-            if status_check_counter.is_finished():
+            if state.status_check_counter.is_finished():
                 cached_ids = msg_cache.read_n_day_old(2)
                 for id_ in cached_ids:
                     if id_.status != "paid":
@@ -121,10 +116,10 @@ async def main():
                             f"Sending status check message for {id_.message_id}")
                         message = CheckOfferStatusMessage(id_.message_id)
                         await server.send_message(message)
-                status_check_counter.restart()
+                state.status_check_counter.restart()
 
             # Deletion of pending offers
-            if pending_deletion_counter.is_finished():
+            if state.pending_deletion_counter.is_finished():
                 pending_offers = msg_cache.read_n_day_old(2, "pending")
                 for offer in pending_offers:
                     logging.info(
@@ -132,10 +127,10 @@ async def main():
                     message = DeleteOfferMessage(offer.message_id)
                     msg_cache.delete(offer.message_id)
                     await server.send_message(message)
-                pending_deletion_counter.restart()
+                state.pending_deletion_counter.restart()
 
             # Deletion of accepted offers that are not paid
-            if accepted_deletion_counter.is_finished():
+            if state.accepted_deletion_counter.is_finished():
                 accepted_offers = msg_cache.read_n_day_old(1, "accepted")
                 for offer in accepted_offers:
                     logging.info(
@@ -143,7 +138,7 @@ async def main():
                     message = DeleteOfferMessage(offer.message_id)
                     msg_cache.delete(offer.message_id)
                     await server.send_message(message)
-                accepted_deletion_counter.restart()
+                state.accepted_deletion_counter.restart()
 
             # Release payments
             if datetime.now().hour == 0:

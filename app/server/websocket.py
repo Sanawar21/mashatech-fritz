@@ -45,7 +45,10 @@ class WebSocketServer:
                     logging.info(
                         f"Error: Invalid offer status. Message: {message}")
                 if message.response:
-                    await self.send_message(message.response)
+                    if message.type_ == "keepAlive":
+                        await websocket.send(message.response)
+                    else:
+                        await self.send_message(message.response)
 
         except websockets.exceptions.ConnectionClosedError:
             pass
