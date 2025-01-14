@@ -2,6 +2,11 @@ import subprocess
 import asyncio
 import websockets
 import logging
+import signal
+import sys
+
+# Global variable to track the subprocess
+process = None
 
 
 async def ping_server(uri):
@@ -23,6 +28,7 @@ async def ping_server(uri):
 
 
 async def supervisor():
+    global process
 
     # Start main.py
     process = subprocess.Popen(["python3", "main.py"])
@@ -40,6 +46,29 @@ async def supervisor():
             logging.info("Restarting main.py with --load-state")
             process = subprocess.Popen(["python3", "main.py", "--load-state"])
 
+
+def handle_shutdown(signum, frame):
+    global process
+    if process is not None:
+        logging.info("Terminating main.py...")
+        process.terminate()
+        process.wait()
+    logging.info("Supervisor shutting down")
+    sys.exit(0)
+
+
 if __name__ == "__main__":
+    # Configure logging
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(supervisor())
+
+    # Register signal handlers
+    signal.signal(signal.SIGINT, handle_shutdown)
+    signal.signal(signal.SIGTERM, handle_shutdown)
+
+    # Run the supervisor
+    try:
+        asyncio.run(supervisor())
+    except SystemExit:
+        pass
+    except Exception as e:
+        logging.error(f"Unexpected error in supervisor: {e}")
