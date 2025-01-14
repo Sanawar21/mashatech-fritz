@@ -25,7 +25,7 @@ async def ping_server(uri):
 async def supervisor():
     while True:
         # Start main.py
-        process = subprocess.Popen(["python", "main.py"])
+        process = subprocess.Popen(["python3", "main.py"])
         logging.info("Started main.py")
 
         # Run WebSocket client
