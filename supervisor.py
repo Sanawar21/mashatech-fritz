@@ -72,5 +72,8 @@ if __name__ == "__main__":
         asyncio.run(supervisor())
     except SystemExit:
         pass
-    except Exception as e:
-        logging.error(f"Unexpected error in supervisor: {e}")
+    except KeyboardInterrupt:
+        process.terminate()
+        process.wait()
+        logging.info("Supervisor shutting down")
+        raise KeyboardInterrupt
