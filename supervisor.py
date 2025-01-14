@@ -36,7 +36,7 @@ async def supervisor():
             process.terminate()
             process.wait()
             logging.info("Restarting main.py with --load-state")
-            process = subprocess.Popen(["python", "main.py", "--load-state"])
+            process = subprocess.Popen(["python3", "main.py", "--load-state"])
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
