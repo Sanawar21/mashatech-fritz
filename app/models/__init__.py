@@ -4,4 +4,3 @@ from .match import Match
 from .message_id import MessageID
 from .counter import Counter
 from .catalog import Catalog
-from .state import State

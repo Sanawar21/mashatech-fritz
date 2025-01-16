@@ -20,19 +20,3 @@ class Counter:
 
     def restart(self):
         self.start_time = time.time()
-
-    def to_dict(self):
-        return {
-            "hours": self.hours,
-            "minutes": self.minutes,
-            "seconds": self.seconds,
-            "start_time": self.start_time,
-            "duration_seconds": self.duration_seconds,
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict):
-        obj = cls(data["hours"], data["minutes"], data["seconds"])
-        obj.start_time = data["start_time"]
-        obj.duration_seconds = data["duration_seconds"]
-        return obj

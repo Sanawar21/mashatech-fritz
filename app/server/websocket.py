@@ -45,10 +45,7 @@ class WebSocketServer:
                     logging.info(
                         f"Error: Invalid offer status. Message: {message}")
                 if message.response:
-                    if message.type_ == "keepAlive":
-                        await websocket.send(message.response.to_json())
-                    else:
-                        await self.send_message(message.response)
+                    await self.send_message(message.response)
 
         except websockets.exceptions.ConnectionClosedError:
             pass
@@ -80,5 +77,5 @@ class WebSocketServer:
         fix for an uncertain bug where the server stops sending messages until a new client connects.
         """
         if self.is_running:
-            async with websockets.connect(f"ws://{self.host}:{self.port}"):
+            async with websockets.connect(self.public_address):
                 await asyncio.sleep(15)
