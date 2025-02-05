@@ -18,7 +18,7 @@ async def main_loop():
             try:
                 async with aiofiles.open("data/context.json", "w") as f:
                     text = await f.read()
-                    ctx = Context.from_dict(eval(text))
+                    ctx = Context.from_json(text)
             except FileNotFoundError:
                 ctx = Context.new()
 
@@ -59,7 +59,7 @@ async def main(ctx: Context | None):
     while True:
         try:
             async with aiofiles.open("data/context.json", "w") as f:
-                await f.write(context.to_dict())
+                await f.write(context.to_json())
 
             msg_cache.refresh()
 

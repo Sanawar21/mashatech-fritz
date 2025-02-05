@@ -1,6 +1,7 @@
 from io import TextIOWrapper
 from .counter import Counter
 import queue
+import json
 
 
 class Context:
@@ -50,6 +51,10 @@ class Context:
         return obj
 
     @classmethod
+    def from_json(cls, data: str):
+        return cls.from_dict(json.loads(data))
+
+    @classmethod
     def from_dict(cls, data: dict):
         kl_prev_ads = data.get("kl_prev_ads")
 
@@ -88,8 +93,8 @@ class Context:
         data = eval(file.read())
         return cls.from_dict(data)
 
-    def to_dict(self):
-        return {
+    def to_json(self):
+        return json.dumps({
             "kl_prev_ads": self.kl_prev_ads,
             "pending_msgs_queue": list(self.pending_msgs_queue.queue),
             "offers_sent_count": self.offers_sent_count,
@@ -99,10 +104,10 @@ class Context:
             "accepted_deletion_counter": self.accepted_deletion_counter.to_dict(),
             "catalog_refresh_counter": self.catalog_refresh_counter.to_dict(),
             "self_connect_counter": self.self_connect_counter.to_dict()
-        }
+        })
 
     def save(self, file: TextIOWrapper):
-        file.write(str(self.to_dict()))
+        file.write(self.to_json())
 
     def start_counters(self):
         self.status_check_counter.start()
