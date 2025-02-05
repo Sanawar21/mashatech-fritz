@@ -5,7 +5,6 @@ setup_logging()
 from app.models import Context
 
 import asyncio
-import aiofiles
 import logging
 from datetime import datetime
 # fmt: on
@@ -22,9 +21,8 @@ async def main_loop():
             await asyncio.sleep(5)
 
             try:
-                async with aiofiles.open("data/context.json", "r") as f:
-                    text = await f.read()
-                    ctx = Context.from_dict(eval(text))
+                with open("data/context.json", "r") as f:
+                    ctx = Context.from_file(f)
             except FileNotFoundError:
                 ctx = Context.new()
 
@@ -62,8 +60,8 @@ async def main(ctx: Context | None):
 
     while True:
         try:
-            async with aiofiles.open("data/context.json", "w") as f:
-                await f.write(str(context.to_dict()))
+            with open("data/context.json", "w") as f:
+                context.save(f)
 
             msg_cache.refresh()
 

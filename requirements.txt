@@ -4,4 +4,3 @@ xmljson
 websockets
 pytz
 pyairtable
-aiofiles
