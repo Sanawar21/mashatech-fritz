@@ -1,12 +1,12 @@
 # fmt: off
-import logging
-from app.models import Context
 from app.utils import setup_logging
-
 setup_logging()
+
+from app.models import Context
 
 import asyncio
 import aiofiles
+import logging
 from datetime import datetime
 # fmt: on
 
