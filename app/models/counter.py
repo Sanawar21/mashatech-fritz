@@ -10,6 +10,8 @@ class Counter:
         self.duration_seconds = hours * 3600 + minutes * 60 + seconds
 
     def is_finished(self):
+        if self.start_time is None:
+            return False
         return time.time() - self.start_time >= self.duration_seconds
 
     def start(self):

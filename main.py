@@ -21,7 +21,7 @@ async def main_loop():
             await asyncio.sleep(5)
 
             try:
-                with open("data/context.json", "r") as f:
+                with open("data/ctx.json", "r") as f:
                     ctx = Context.from_file(f)
             except FileNotFoundError:
                 ctx = Context.new()
@@ -29,54 +29,48 @@ async def main_loop():
 
 async def main(ctx: Context | None):
     from app.utils import get_chat_id_from_link
-    from app.clients import KleinanzeigenClient, TelegramClient, AirtableClient
-    from app.server import WebSocketServer
-    from app.models import Catalog
-    from app.cache import MessageIDCache
     from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
     from app.exceptions import InvalidAdException
+    from app.clients import KleinanzeigenClient
 
-    ka_client = KleinanzeigenClient()
-    tg_client = TelegramClient()
-    at_client = AirtableClient()
-    msg_cache = MessageIDCache()
+    if not ctx:
+        ctx = Context.new()
 
-    server = WebSocketServer('0.0.0.0', 8765)
-    catalog = Catalog()
+    ka_client = ctx.ka_client
+    tg_client = ctx.tg_client
+    at_client = ctx.at_client
+    msg_cache = ctx.msg_cache
+    server = ctx.server
+    catalog = ctx.catalog
 
     MAX_OFFERS_PER_HOUR = 40
 
-    if not ctx:
-        context = Context.new()
-    else:
-        context = ctx
-
-    ka_client.previous_ads = context.kl_prev_ads
+    ka_client.previous_ads = ctx.kl_prev_ads
 
     await server.start()
     logging.info(f"Server started at {server.public_address}")
 
-    context.start_counters()
+    ctx.start_counters()
 
     while True:
         try:
-            with open("data/context.json", "w") as f:
-                context.save(f)
+            with open("data/ctx.json", "w") as f:
+                ctx.save(f)
 
             msg_cache.refresh()
 
-            if context.self_connect_counter.is_finished():
+            if ctx.self_connect_counter.is_finished():
                 try:
                     await server.self_connect()
                 except TimeoutError:
                     logging.error("Unable to connect to server, restarting")
                     await server.stop()
                     await server.start()
-                context.self_connect_counter.restart()
+                ctx.self_connect_counter.restart()
 
-            if context.catalog_refresh_counter.is_finished():
+            if ctx.catalog_refresh_counter.is_finished():
                 catalog.refresh()
-                context.catalog_refresh_counter.restart()
+                ctx.catalog_refresh_counter.restart()
 
             await asyncio.sleep(1)
 
@@ -86,7 +80,8 @@ async def main(ctx: Context | None):
             except Exception as e:
                 logging.info(f"Client disconnected: {e}", exc_info=True)
                 previous_ads = ka_client.previous_ads
-                ka_client = KleinanzeigenClient()
+                ctx.ka_client = KleinanzeigenClient()
+                ka_client = ctx.ka_client
                 ka_client.previous_ads = previous_ads
                 ads = ka_client.get_fritz_ads()
 
@@ -96,41 +91,63 @@ async def main(ctx: Context | None):
                 except InvalidAdException:
                     continue
 
-                if context.offers_sent_count <= 50:
+                if ctx.offers_sent_count <= 50:
                     logging.info(f"Sending offer to {ad.uid}")
                     await server.send_message(message)
                     tg_client.send_ad_alert(ad)
-                    context.offers_sent_count += 1
+                    ctx.offers_sent_count += 1
                 else:
                     logging.info(f"Putting {ad.uid} in queue")
-                    context.pending_msgs_queue.put(message)
+                    ctx.pending_msgs_queue.put(message)
 
             # Send pending offers
-            while not context.pending_msgs_queue.empty() and context.offers_sent_count <= MAX_OFFERS_PER_HOUR:
-                message = context.pending_msgs_queue.get()
+            while not ctx.pending_msgs_queue.empty() and ctx.offers_sent_count <= MAX_OFFERS_PER_HOUR:
+                message = ctx.pending_msgs_queue.get()
                 logging.info(f"Sending offer to {message.link} (from queue)")
                 tg_client.send_ad_alert(ad)
                 await server.send_message(message)
-                context.offers_sent_count += 1
+                ctx.offers_sent_count += 1
 
             # Reset offers sent counter
-            if context.offers_reset_counter.is_finished():
-                context.offers_sent_count = 0
-                context.offers_reset_counter.restart()
+            if ctx.offers_reset_counter.is_finished():
+                ctx.offers_sent_count = 0
+                ctx.offers_reset_counter.restart()
 
             # Check status of offers
-            if context.status_check_counter.is_finished():
-                cached_ids = msg_cache.read_n_day_old(2)
-                for id_ in cached_ids:
-                    if id_.status != "paid":
+            if ctx.status_check_counter.is_finished():
+                if ctx.check_status_queue.empty():
+                    cached_ids = msg_cache.read_n_day_old(2)
+                    ids_to_check = [
+                        id_ for id_ in cached_ids if id_.status != "paid"]
+                    id_ = ids_to_check[0] if ids_to_check else None
+                    if id_:  # If there are no ids to check, skip the check
                         logging.info(
                             f"Sending status check message for {id_.message_id}")
                         message = CheckOfferStatusMessage(id_.message_id)
                         await server.send_message(message)
-                context.status_check_counter.restart()
+
+                        # add remaining ids to the queue
+                        for id_ in ids_to_check[1:]:
+                            ctx.check_status_queue.put(id_)
+
+                        ctx.status_check_sub_counter.start()
+
+                ctx.status_check_counter.restart()
+
+            # Check status of offers (sub counter)
+            if ctx.status_check_sub_counter.is_finished():
+                if not ctx.check_status_queue.empty():
+                    id_ = ctx.check_status_queue.get()
+                    logging.info(
+                        f"Sending status check message for {id_.message_id}")
+                    message = CheckOfferStatusMessage(id_.message_id)
+                    await server.send_message(message)
+                    ctx.status_check_sub_counter.restart()
+                else:
+                    ctx.status_check_sub_counter.reset()
 
             # Deletion of pending offers
-            if context.pending_deletion_counter.is_finished():
+            if ctx.pending_deletion_counter.is_finished():
                 pending_offers = msg_cache.read_n_day_old(2, "pending")
                 for offer in pending_offers:
                     logging.info(
@@ -138,10 +155,10 @@ async def main(ctx: Context | None):
                     message = DeleteOfferMessage(offer.message_id)
                     msg_cache.delete(offer.message_id)
                     await server.send_message(message)
-                context.pending_deletion_counter.restart()
+                ctx.pending_deletion_counter.restart()
 
             # Deletion of accepted offers that are not paid
-            if context.accepted_deletion_counter.is_finished():
+            if ctx.accepted_deletion_counter.is_finished():
                 accepted_offers = msg_cache.read_n_day_old(1, "accepted")
                 for offer in accepted_offers:
                     logging.info(
@@ -149,7 +166,7 @@ async def main(ctx: Context | None):
                     message = DeleteOfferMessage(offer.message_id)
                     msg_cache.delete(offer.message_id)
                     await server.send_message(message)
-                context.accepted_deletion_counter.restart()
+                ctx.accepted_deletion_counter.restart()
 
             # Release payments
             if datetime.now().hour == 0:

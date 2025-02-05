@@ -6,13 +6,15 @@ import logging
 from ..messages import MessageFactory
 from ..messages.base import OutgoingMessage
 from ..exceptions import InvalidIncomingMessageException, InvalidOfferStatusException
+from ..models import Context
 
 
 class WebSocketServer:
-    def __init__(self, host, port):
+    def __init__(self, host, port, ctx: Context):
         self.host = host
         self.port = port
         self.server = None
+        self.ctx = ctx
         self.message_factory = MessageFactory()
 
         self.clients = set()
@@ -40,7 +42,7 @@ class WebSocketServer:
                     logging.info(f"Invalid incoming message: {message}")
                     continue
                 try:
-                    message.process()
+                    message.process(self.ctx)
                 except InvalidOfferStatusException:
                     logging.info(
                         f"Error: Invalid offer status. Message: {message}")

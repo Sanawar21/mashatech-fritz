@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from ..models import Context
 
 import json
 
@@ -23,7 +24,7 @@ class IncomingMessage(AbstractBaseMessage):
         pass
 
     @abstractmethod
-    def process(self):
+    def process(self, ctx: Context):
         pass
 
 

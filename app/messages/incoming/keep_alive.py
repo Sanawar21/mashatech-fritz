@@ -9,5 +9,5 @@ class KeepAliveMessage(IncomingMessage):
     def from_dict(cls, data: dict):
         return cls()
 
-    def process(self):
+    def process(self, ctx):
         pass

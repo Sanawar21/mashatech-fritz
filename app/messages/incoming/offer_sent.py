@@ -8,7 +8,6 @@ class OfferSentMessage(IncomingMessage):
     """When the extension sends an offer to the ad poster, it will send this message to the websocket."""
 
     type_ = "offerSentAlert"
-    __cache = MessageIDCache()
 
     def __init__(self, message_id: str, ad_uid: str) -> None:
         # ad uid is offer_id
@@ -21,7 +20,7 @@ class OfferSentMessage(IncomingMessage):
     def from_dict(cls, data: dict):
         return cls(data.get('msg_id'), data.get('offer_id'))
 
-    def process(self):
-        self.__cache.refresh()
+    def process(self, ctx):
+        ctx.msg_cache.refresh()
         logging.info(f"Sending of offer for {self.ad_uid} has been confirmed")
-        self.__cache.create(self.message_id, self.ad_uid)
+        ctx.msg_cache.create(self.message_id, self.ad_uid)
