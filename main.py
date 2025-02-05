@@ -52,6 +52,8 @@ async def main(ctx: Context | None):
     await server.start()
     logging.info(f"Server started at {server.public_address}")
 
+    context.start_counters()
+
     while True:
         try:
             with open("data/context.json", "w") as f:
