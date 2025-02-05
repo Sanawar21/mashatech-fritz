@@ -6,11 +6,10 @@ import logging
 from ..messages import MessageFactory
 from ..messages.base import OutgoingMessage
 from ..exceptions import InvalidIncomingMessageException, InvalidOfferStatusException
-from ..models import Context
 
 
 class WebSocketServer:
-    def __init__(self, host, port, ctx: Context):
+    def __init__(self, host, port, ctx):
         self.host = host
         self.port = port
         self.server = None
