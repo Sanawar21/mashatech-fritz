@@ -1,8 +1,14 @@
+# fmt: off
+import logging
+from app.models import Context
+from app.utils import setup_logging
+
+setup_logging()
+
 import asyncio
 import aiofiles
-import logging
 from datetime import datetime
-from app.models import Context
+# fmt: on
 
 
 async def main_loop():
@@ -24,9 +30,7 @@ async def main_loop():
 
 
 async def main(ctx: Context | None):
-    from app.utils import get_chat_id_from_link, setup_logging
-    setup_logging()  # prevents the overriden logging.basicConfig from being called
-
+    from app.utils import get_chat_id_from_link
     from app.clients import KleinanzeigenClient, TelegramClient, AirtableClient
     from app.server import WebSocketServer
     from app.models import Catalog
