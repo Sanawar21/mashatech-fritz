@@ -71,7 +71,7 @@ class Catalog:
         return {
             product.name: int(product.price)
             for product in self.__entries
-            if product.name != "universal"
+            if product.price is not None and product.name is not None and product.name != "universal"
         }
 
     def is_enabled(self, product_name: str):
