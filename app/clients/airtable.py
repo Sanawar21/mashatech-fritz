@@ -30,6 +30,28 @@ class AirtableClient(Table):
             result["fields"]) for result in filtered_results]
         return filtered_results
 
+    def update(self, selector: str, field_name: str, data: str):
+        """
+        Find the record by 'Ad UID' and prepend `data` to the specified field (e.g., 'Products').
+        """
+        formula = f"{{Ad UID}} = '{selector}'"
+        records = self.all(formula=formula)
+
+        if not records:
+            logging.warning(f"No record found for Ad UID: {selector}")
+            return
+
+        record = records[0]  # assuming 'Ad UID' is unique
+        record_id = record["id"]
+        current_value = record["fields"].get(field_name, "")
+
+        # Prepend the new data to the existing field value
+        updated_value = f"{data}\n{current_value}"
+
+        super().update(record_id, {field_name: updated_value})
+        logging.info(
+            f"Updated record {record_id}: set {field_name} to '{updated_value}'")
+
     def create(self, entry: AirtableEntry):
         """
         Create a new entry in the Airtable database.
