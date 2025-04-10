@@ -1,6 +1,5 @@
 from ..base import IncomingMessage
 from ...utils import get_ad_id_from_link
-from ...models import Context
 
 
 class ProductListMessage(IncomingMessage):
@@ -23,5 +22,5 @@ class ProductListMessage(IncomingMessage):
             data.get('text')
         )
 
-    def process(self, ctx: Context):
+    def process(self, ctx):
         ctx.at_client.update(self.ad_uid, "Products", self.text)
