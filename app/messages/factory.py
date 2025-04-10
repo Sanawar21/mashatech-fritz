@@ -14,7 +14,8 @@ class MessageFactory:
             message_data = json.loads(message_data)
             type_ = message_data.get('type')
             messages: list[IncomingMessage] = [KeepAliveMessage, OfferSentMessage,
-                                               OfferStatusAlertMessage, AmountPaidAlertMessage]
+                                               OfferStatusAlertMessage, AmountPaidAlertMessage,
+                                               ProductListMessage]
             for message in messages:
                 if message.type_ == type_:
                     return message.from_dict(message_data)
