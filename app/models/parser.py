@@ -1,6 +1,6 @@
 from .match import Match
 from .catalog import Catalog
-from ..clients import GeminiClient
+from ..clients.gemini import GeminiClient
 from ..exceptions import GeminiAPIError
 
 import logging
