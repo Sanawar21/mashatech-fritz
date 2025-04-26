@@ -4,3 +4,5 @@ xmljson
 websockets
 pytz
 pyairtable
+google-genai
+deep-translator

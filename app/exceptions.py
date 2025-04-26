@@ -1,6 +1,3 @@
-from requests.exceptions import ConnectionError
-
-
 class InvalidIncomingMessageException(Exception):
     pass
 
@@ -10,4 +7,8 @@ class InvalidAdException(Exception):
 
 
 class InvalidOfferStatusException(Exception):
+    pass
+
+
+class GeminiAPIError(Exception):
     pass
