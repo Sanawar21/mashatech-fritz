@@ -36,7 +36,7 @@ class Context:
         self.tg_client = TelegramClient()
         self.at_client = AirtableClient()
         self.msg_cache = MessageIDCache()
-        self.server = WebSocketServer('0.0.0.0', 8765, self)
+        self.server = WebSocketServer('0.0.0.0', 8766, self)
         self.catalog = Catalog()
 
     @classmethod
