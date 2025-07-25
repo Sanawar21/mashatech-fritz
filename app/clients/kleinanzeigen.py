@@ -5,7 +5,6 @@ import logging
 from xml.etree.ElementTree import fromstring
 from xmljson import BadgerFish
 
-from ..models import Ad
 from ..utils import KA_USERNAME, KA_PASSWORD
 
 
@@ -100,9 +99,9 @@ class KleinanzeigenClient:
         content = bf.data(fromstring(xml))
         return content
 
-    def get_ad(self, id) -> Ad:
+    def get_ad(self, id):
         url = f'/ads/{id}.json'
-        return Ad(self.__http_get_json_content(url))
+        return self.__http_get_json_content(url)
 
     def get_view_count(self, id: int):
         """
@@ -117,7 +116,7 @@ class KleinanzeigenClient:
 
         return self.__http_get_json_content(url)['value']
 
-    def get_fritz_ads(self) -> list[Ad]:
+    def get_fritz_ads(self):
         to_return = []
 
         keywords = ["fritz", "fritzbox", "fritz%21box"]

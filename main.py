@@ -1,4 +1,5 @@
 # fmt: off
+from app.models.ad import Ad
 from app.utils import setup_logging
 setup_logging()
 
@@ -28,8 +29,7 @@ async def main_loop():
 
 
 async def main(ctx: Context | None):
-    from app.utils import get_chat_id_from_link
-    from app.messages.outgoing import SendOfferMessage, CheckOfferStatusMessage, DeleteOfferMessage, ReleasePaymentMessage
+    from app.messages.outgoing import SendOfferMessage
     from app.exceptions import InvalidAdException
     from app.clients import KleinanzeigenClient
 
@@ -38,7 +38,6 @@ async def main(ctx: Context | None):
 
     ka_client = ctx.ka_client
     tg_client = ctx.tg_client
-    at_client = ctx.at_client
     msg_cache = ctx.msg_cache
     server = ctx.server
     catalog = ctx.catalog
@@ -87,6 +86,7 @@ async def main(ctx: Context | None):
 
             for ad in ads:
                 try:
+                    ad = Ad(ad)
                     message = SendOfferMessage(ad)
                 except InvalidAdException:
                     continue
@@ -112,70 +112,6 @@ async def main(ctx: Context | None):
             if ctx.offers_reset_counter.is_finished():
                 ctx.offers_sent_count = 0
                 ctx.offers_reset_counter.restart()
-
-            # Check status of offers
-            if ctx.status_check_counter.is_finished():
-                if ctx.check_status_queue.empty():
-                    cached_ids = msg_cache.read_n_day_old(2)
-                    ids_to_check = [
-                        id_ for id_ in cached_ids if id_.status != "paid"]
-                    id_ = ids_to_check[0] if ids_to_check else None
-                    if id_:  # If there are no ids to check, skip the check
-                        logging.info(
-                            f"Sending status check message for {id_.message_id}")
-                        message = CheckOfferStatusMessage(id_.message_id)
-                        await server.send_message(message)
-
-                        # add remaining ids to the queue
-                        for id_ in ids_to_check[1:]:
-                            ctx.check_status_queue.put(id_)
-
-                        ctx.status_check_sub_counter.start()
-
-                ctx.status_check_counter.restart()
-
-            # Check status of offers (sub counter)
-            if ctx.status_check_sub_counter.is_finished():
-                if not ctx.check_status_queue.empty():
-                    id_ = ctx.check_status_queue.get()
-                    logging.info(
-                        f"Sending status check message for {id_.message_id}")
-                    message = CheckOfferStatusMessage(id_.message_id)
-                    await server.send_message(message)
-                    ctx.status_check_sub_counter.restart()
-                else:
-                    ctx.status_check_sub_counter.reset()
-
-            # Deletion of pending offers
-            if ctx.pending_deletion_counter.is_finished():
-                pending_offers = msg_cache.read_n_day_old(2, "pending")
-                for offer in pending_offers:
-                    logging.info(
-                        f"Sending delete offer message for {offer.ad_uid} (pending)")
-                    message = DeleteOfferMessage(offer.message_id)
-                    msg_cache.delete(offer.message_id)
-                    await server.send_message(message)
-                ctx.pending_deletion_counter.restart()
-
-            # Deletion of accepted offers that are not paid
-            if ctx.accepted_deletion_counter.is_finished():
-                accepted_offers = msg_cache.read_n_day_old(1, "accepted")
-                for offer in accepted_offers:
-                    logging.info(
-                        f"Sending delete offer message for {offer.ad_uid} (accepted)")
-                    message = DeleteOfferMessage(offer.message_id)
-                    msg_cache.delete(offer.message_id)
-                    await server.send_message(message)
-                ctx.accepted_deletion_counter.restart()
-
-            # Release payments
-            if datetime.now().hour == 0:
-                perfect_entries = at_client.read_new_perfects()
-                for entry in perfect_entries:
-                    logging.info(f"Releasing payment for {entry.ad_uid}")
-                    message_id = get_chat_id_from_link(entry.chat_link)
-                    message = ReleasePaymentMessage(message_id)
-                    await server.send_message(message)
 
         except Exception as e:
             logging.error(f"Error in main loop: {e}", exc_info=True)

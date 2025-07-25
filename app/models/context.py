@@ -1,4 +1,4 @@
-from ..clients import KleinanzeigenClient, TelegramClient, AirtableClient
+from ..clients import KleinanzeigenClient, TelegramClient
 from ..server import WebSocketServer
 from ..cache import MessageIDCache
 from . import Catalog
@@ -34,7 +34,6 @@ class Context:
         self.status_check_sub_counter = Counter(0, 3, 0)
         self.ka_client = KleinanzeigenClient()
         self.tg_client = TelegramClient()
-        self.at_client = AirtableClient()
         self.msg_cache = MessageIDCache()
         self.server = WebSocketServer('0.0.0.0', 8766, self)
         self.catalog = Catalog()

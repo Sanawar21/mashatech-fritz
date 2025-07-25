@@ -1,5 +1,4 @@
 from ..utils import TG_API_ENDPOINT, TG_AMOUNT_PAID_CHAT_ID, TG_AD_ALERT_CHAT_ID, TG_OFFER_ACCEPTED_CHAT_ID
-from ..models import Ad
 
 import requests
 import datetime
@@ -41,7 +40,7 @@ class TelegramClient:
         params = {'chat_id': chat_id, 'text': text}
         requests.get(url, params=params)
 
-    def send_ad_alert(self, ad: Ad):
+    def send_ad_alert(self, ad):
         text_lines = [
             f"Title: {ad.title}",
             "Products:",
@@ -56,7 +55,7 @@ class TelegramClient:
         logging.info("Sending message to Telegram (Ad alert)")
         self.send_message(text, TG_AD_ALERT_CHAT_ID)
 
-    def send_offer_accepted_alert(self, ad: Ad, price: float, ad_chat_link: str):
+    def send_offer_accepted_alert(self, ad, price: float, ad_chat_link: str):
         text_lines = [
             f"Title: {ad.title}",
             "Products:",
@@ -69,7 +68,7 @@ class TelegramClient:
         logging.info("Sending message to Telegram (Offer accepted)")
         self.send_message(text, TG_OFFER_ACCEPTED_CHAT_ID)
 
-    def send_amount_paid_alert(self, ad: Ad, ad_chat_link: str):
+    def send_amount_paid_alert(self, ad, ad_chat_link: str):
         text_lines = [
             f"Title: {ad.title}",
             f"Poster: {ad.poster_name}",
