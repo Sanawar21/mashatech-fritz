@@ -163,3 +163,5 @@ cython_debug/
 
 logs/
 data/*
+.vscode/
+extracted_products_log.txt

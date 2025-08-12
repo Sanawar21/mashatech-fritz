@@ -30,7 +30,7 @@ class WebSocketServer:
         except requests.RequestException as e:
             return f"Error: {e}"
 
-    async def handle_client(self, websocket, path):
+    async def handle_client(self, websocket, *args, **kwargs):
         # Add client to the set of connected clients
         self.clients.add(websocket)
         try:

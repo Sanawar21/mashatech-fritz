@@ -56,6 +56,7 @@ class AdParser:
     def find_matches(self, product_title: str, product_description: str) -> list[Match]:
         prices = self.__catalog.prices
         products = list(prices.keys())
+        enabled_products = [product for product in products if self.__catalog.is_enabled(product)]
         matches: list[Match] = []
 
         # Translate the product title and description from german to English
@@ -66,12 +67,16 @@ class AdParser:
 
         try:
             results = self.__gemeni_client.extract_products(
-                title, description, products)
+                title, description, enabled_products)
         except GeminiAPIError:
             return None
 
         for match in results:
-            matches.append(
-                Match(match["name"], match["quantity"], prices[match["name"]]))
+            try:
+                m = Match(match["name"], match["quantity"], prices[match["name"]])
+                matches.append(m)
+            except KeyError:
+                continue
+            
 
         return matches

@@ -79,7 +79,7 @@ class GeminiClient:
             log_file.write(f"Timestamp: {timestamp}\n")
             log_file.write(f"Ad Title: {ad_title}\n")
             log_file.write(f"Ad Description: {ad_description}\n")
-            log_file.write(f"Products: {', '.join(products)}\n")
+            log_file.write(f"Products: {', '.join([str(p) for p in products])}\n")
             log_file.write("-" * 40 + "\n")
         return products
 
