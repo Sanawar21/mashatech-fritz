@@ -11,7 +11,7 @@ class GeminiClient:
     def __init__(self):
         self.api_key = GEMINI_API_KEY
         self.client = genai.Client(api_key=self.api_key)
-        self.model = "gemini-2.0-flash-lite"
+        self.model = "gemini-2.5-flash-lite"
         self.system_instructions = open(
             GEMINI_SYSTEM_INSTRUCTIONS_PATH, "r"
         ).read()
@@ -66,12 +66,13 @@ class GeminiClient:
                 contents=contents,
                 config=self.generate_content_config(products),
             )
+            text = response.text
+            obj = json.loads(text)
+
         except Exception as e:
             logging.error(f"Error fetching from Gemini: {e}")
             raise GeminiAPIError(f"Failed to fetch data from Gemini API. {e}")
 
-        text = response.text
-        obj = json.loads(text)
         products = obj.get("products", [])
         # Write ad_title, ad_description, products, and timestamp to a file
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

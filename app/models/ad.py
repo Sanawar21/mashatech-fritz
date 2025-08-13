@@ -44,8 +44,13 @@ class Ad:
         except:
             self.is_buy_now_available = False
 
+
         self.matches: list[Match] = self.__parser.find_matches(
             self.title, self.description)
+        
+        if not self.matches:
+            self.matches = []
+
         self.offer_price = self.__parser.get_offer_price(self.matches, self)
 
     def __get_age(self):
