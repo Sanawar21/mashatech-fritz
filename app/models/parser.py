@@ -31,9 +31,9 @@ class AdParser:
         elif ad.is_damaged:
             logging.info(f"Ad rejected. Damaged: {ad.is_damaged}")
             return False
-        elif ad.is_only_pickup:
-            logging.info(f"Ad rejected. Pickup only: {ad.is_only_pickup}")
-            return False
+        # elif ad.is_only_pickup:
+        #     logging.info(f"Ad rejected. Pickup only: {ad.is_only_pickup}")
+        #     return False
         elif not ad.price:
             logging.info(f"Ad rejected. No price: {ad.price}")
             return False

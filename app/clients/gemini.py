@@ -11,7 +11,7 @@ class GeminiClient:
     def __init__(self):
         self.api_key = GEMINI_API_KEY
         self.client = genai.Client(api_key=self.api_key)
-        self.model = "gemini-2.5-flash-lite"
+        self.model = "gemini-2.0-flash-lite"
         self.system_instructions = open(
             GEMINI_SYSTEM_INSTRUCTIONS_PATH, "r"
         ).read()

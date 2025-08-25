@@ -7,7 +7,8 @@ from app.models import Context
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, time
+import zoneinfo  # Python 3.9+
 # fmt: on
 
 
@@ -43,6 +44,14 @@ async def main(ctx: Context | None):
     catalog = ctx.catalog
 
     MAX_OFFERS_PER_HOUR = 40
+
+    WORKING_TIME_START = time(7, 0)
+    WORKING_TIME_END = time(22, 0)
+
+    def is_working_time():
+        germany_tz = zoneinfo.ZoneInfo("Europe/Berlin")
+        now = datetime.now(germany_tz).time()
+        return WORKING_TIME_START <= now <= WORKING_TIME_END
 
     ka_client.previous_ads = ctx.kl_prev_ads
 
@@ -91,7 +100,7 @@ async def main(ctx: Context | None):
                 except InvalidAdException:
                     continue
 
-                if ctx.offers_sent_count <= 50:
+                if ctx.offers_sent_count <= MAX_OFFERS_PER_HOUR and is_working_time():
                     logging.info(f"Sending offer to {ad.uid}")
                     await server.send_message(message)
                     tg_client.send_ad_alert(ad)
@@ -101,7 +110,7 @@ async def main(ctx: Context | None):
                     ctx.pending_msgs_queue.put(message)
 
             # Send pending offers
-            while not ctx.pending_msgs_queue.empty() and ctx.offers_sent_count <= MAX_OFFERS_PER_HOUR:
+            while not ctx.pending_msgs_queue.empty() and ctx.offers_sent_count <= MAX_OFFERS_PER_HOUR and is_working_time():
                 message = ctx.pending_msgs_queue.get()
                 logging.info(f"Sending offer to {message.link} (from queue)")
                 tg_client.send_ad_alert(ad)
