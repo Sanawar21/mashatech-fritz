@@ -49,7 +49,7 @@ class GeminiClient:
         text = ", ".join(products)
         return self.system_instructions.replace("{{product_names}}", text)
 
-    def extract_products(self, ad_title, ad_description, products):
+    def extract_products(self, ad_title, ad_description, products, ad):
         contents = [
             types.Content(
                 role="user",
@@ -78,6 +78,7 @@ class GeminiClient:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open("extracted_products_log.txt", "a") as log_file:
             log_file.write(f"Timestamp: {timestamp}\n")
+            log_file.write(f"Ad Link: {ad.link}\n")
             log_file.write(f"Ad Title: {ad_title}\n")
             log_file.write(f"Ad Description: {ad_description}\n")
             log_file.write(f"Products: {', '.join([str(p) for p in products])}\n")

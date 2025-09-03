@@ -53,10 +53,11 @@ class AdParser:
                 f"Ad rejected. Price too high: {ad.price} (Reasonable price: {estimated_price})")
             return False
 
-    def find_matches(self, product_title: str, product_description: str) -> list[Match]:
+    def find_matches(self, ad) -> list[Match]:
+        product_title = ad.title
+        product_description = ad.description
         prices = self.__catalog.prices
         products = list(prices.keys())
-        enabled_products = [product for product in products if self.__catalog.is_enabled(product)]
         matches: list[Match] = []
 
         # Translate the product title and description from german to English
@@ -67,7 +68,7 @@ class AdParser:
 
         try:
             results = self.__gemeni_client.extract_products(
-                title, description, enabled_products)
+                title, description, products, ad)
         except GeminiAPIError:
             return None
 

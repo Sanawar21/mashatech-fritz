@@ -46,7 +46,7 @@ class Ad:
 
 
         self.matches: list[Match] = self.__parser.find_matches(
-            self.title, self.description)
+            self)
         
         if not self.matches:
             self.matches = []
