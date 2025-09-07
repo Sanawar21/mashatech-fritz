@@ -23,25 +23,27 @@ class SendOfferMessage(OutgoingMessage):
                 not all([self.__catalog.is_enabled(match.product) for match in ad.matches]):
             raise InvalidAdException
 
-        self.message = self.__get_message(ad.matches)
         self.link = ad.link
         self.offer_price = ad.offer_price
+        self.message = self.__get_message(ad.matches)
 
     def __get_message(self, matches: list[Match]) -> str:
         products = [match.product for match in matches]
         messages = self.__catalog.messages
+        message = messages["universal"]
         if len(products) == 1:
             product = products[0]
             try:
-                return messages[product]
+                message = messages[product]
             except KeyError:
                 pass
         else:
             for product in products:
                 if product in messages.keys():
-                    return messages[product]
+                    message = messages[product]
 
-        return messages["universal"]
+        message.replace('" "', self.offer_price)
+        return message
 
     def to_dict(self):
         return {
