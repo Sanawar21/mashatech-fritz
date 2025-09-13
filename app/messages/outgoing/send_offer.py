@@ -42,7 +42,7 @@ class SendOfferMessage(OutgoingMessage):
                 if product in messages.keys():
                     message = messages[product]
 
-        message.replace('" "', str(self.offer_price))
+        message = message.replace('" "', str(int(self.offer_price)))
         return message
 
     def to_dict(self):
