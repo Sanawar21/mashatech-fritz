@@ -166,3 +166,10 @@ data/*
 .vscode/
 extracted_products_log.txt
 extracted_products_log-old.txt
+data/airtable_products.json
+data/message_ids.json
+
+.claude
+.docs
+docs
+input.md

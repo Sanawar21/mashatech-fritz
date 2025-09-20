@@ -1,7 +1,7 @@
 import logging
-from pyairtable import Table
+from ..clients.googlesheets import GoogleSheetsTable
 
-from ..utils import AT_CATALOG_NAME, AT_BASE_ID, AT_API_KEY
+from ..utils import AT_CATALOG_NAME, AT_BASE_ID, AT_API_KEY, GOOGLE_SHEETS_URL
 
 
 class Catalog:
@@ -53,7 +53,7 @@ class Catalog:
     __is_initialized = False
 
     def __init__(self):
-        self.__table = Table(AT_API_KEY, AT_BASE_ID, AT_CATALOG_NAME)
+        self.__table = GoogleSheetsTable(GOOGLE_SHEETS_URL)
         if Catalog.__is_initialized is False:
             self.refresh()
             Catalog.__is_initialized = True
