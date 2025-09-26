@@ -16,4 +16,7 @@ from app.models import Catalog
 # print(f"Title: {title}")
 # print(f"Description: {description}")
 
-print(list(Catalog().prices.keys()))
+cat = Catalog()
+print(list(cat.prices.keys()))
+
+print(cat.messages)

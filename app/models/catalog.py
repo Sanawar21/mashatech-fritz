@@ -37,7 +37,7 @@ class Catalog:
         def __init__(self, name, price, message, is_enabled):
             self.name = name
             self.price = price
-            self.message = message
+            self.message = self.__parse_message(message)
             self.is_enabled = is_enabled
 
         @classmethod
@@ -48,6 +48,23 @@ class Catalog:
                 data.get(cls.MESSAGE),
                 data.get(cls.IS_ENABLED)
             )
+
+        def __parse_message(self, message: str) -> str:
+            """
+            Ensures the message text is in correct UTF-8 format.
+            If the string looks double-encoded (e.g., 'GerÃ¤t'),
+            it is re-decoded properly. Otherwise, it is returned unchanged.
+            """
+            if not isinstance(message, str):
+                return message
+
+            try:
+                # Fix double-encoding: str -> bytes (latin1) -> str (utf-8)
+                fixed = message.encode("latin1").decode("utf-8")
+                # Only replace if the conversion actually fixed something
+                return fixed if fixed != message else message
+            except UnicodeDecodeError:
+                return message
 
     __entries = []
     __is_initialized = False
