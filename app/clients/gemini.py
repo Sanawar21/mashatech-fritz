@@ -1,4 +1,4 @@
-from ..utils import GEMINI_API_KEY, GEMINI_SYSTEM_INSTRUCTIONS_PATH
+from ..utils import GEMINI_API_KEY, GEMINI_SYSTEM_INSTRUCTIONS_PATH, GEMINI_MODEL_NAME
 import logging
 import json
 from app.exceptions import GeminiAPIError
@@ -11,7 +11,7 @@ class GeminiClient:
     def __init__(self):
         self.api_key = GEMINI_API_KEY
         self.client = genai.Client(api_key=self.api_key)
-        self.model = "gemini-2.0-flash-lite"
+        self.model = GEMINI_MODEL_NAME
         self.system_instructions = open(
             GEMINI_SYSTEM_INSTRUCTIONS_PATH, "r"
         ).read()
@@ -81,7 +81,8 @@ class GeminiClient:
             log_file.write(f"Ad Link: {ad.link}\n")
             log_file.write(f"Ad Title: {ad_title}\n")
             log_file.write(f"Ad Description: {ad_description}\n")
-            log_file.write(f"Products: {', '.join([str(p) for p in products])}\n")
+            log_file.write(
+                f"Products: {', '.join([str(p) for p in products])}\n")
             log_file.write("-" * 40 + "\n")
         return products
 
