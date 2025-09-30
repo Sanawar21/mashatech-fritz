@@ -46,7 +46,7 @@ class TelegramClient:
             "Products:",
             "\n".join(
                 [f"    {match.quantity}x {match.product} ({match.price} € each)" for match in ad.matches]),
-            f"Calculated Price: {sum([match.price for match in ad.matches])} €",
+            f"Calculated Price: {sum([match.price * match.quantity for match in ad.matches])} €",
             f"Offered Price: {int(ad.offer_price)} €",
             f"Listed Price: {int(ad.price)} €",
             f"Link: {ad.link}"
