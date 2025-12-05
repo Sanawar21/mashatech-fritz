@@ -51,19 +51,20 @@ class Catalog:
 
         def __parse_message(self, message: str) -> str:
             """
-            Ensures the message text is in correct UTF-8 format.
-            If the string looks double-encoded (e.g., 'GerÃ¤t'),
-            it is re-decoded properly. Otherwise, it is returned unchanged.
+            Fixes common double-encoded UTF-8 (e.g., 'GerÃ¤t' → 'Gerät').
+            If decoding fails or the string is normal Unicode, return unchanged.
             """
             if not isinstance(message, str):
                 return message
 
             try:
-                # Fix double-encoding: str -> bytes (latin1) -> str (utf-8)
-                fixed = message.encode("latin1").decode("utf-8")
-                # Only replace if the conversion actually fixed something
-                return fixed if fixed != message else message
-            except UnicodeDecodeError:
+                # Attempt Latin-1 → UTF-8 correction safely
+                fixed = message.encode("latin1", errors="ignore").decode("utf-8", errors="ignore")
+
+                # Only return fixed if it clearly changed the text
+                return fixed if fixed and fixed != message else message
+
+            except Exception:
                 return message
 
     __entries = []

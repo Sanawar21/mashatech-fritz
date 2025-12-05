@@ -74,16 +74,16 @@ class GeminiClient:
             raise GeminiAPIError(f"Failed to fetch data from Gemini API. {e}")
 
         products = obj.get("products", [])
-        # Write ad_title, ad_description, products, and timestamp to a file
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open("extracted_products_log.txt", "a") as log_file:
-            log_file.write(f"Timestamp: {timestamp}\n")
-            log_file.write(f"Ad Link: {ad.link}\n")
-            log_file.write(f"Ad Title: {ad_title}\n")
-            log_file.write(f"Ad Description: {ad_description}\n")
-            log_file.write(
-                f"Products: {', '.join([str(p) for p in products])}\n")
-            log_file.write("-" * 40 + "\n")
+        ## Write ad_title, ad_description, products, and timestamp to a file
+        # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # with open("extracted_products_log.txt", "a") as log_file:
+        #     log_file.write(f"Timestamp: {timestamp}\n")
+        #     log_file.write(f"Ad Link: {ad.link}\n")
+        #     log_file.write(f"Ad Title: {ad_title}\n")
+        #     log_file.write(f"Ad Description: {ad_description}\n")
+        #     log_file.write(
+        #         f"Products: {', '.join([str(p) for p in products])}\n")
+        #     log_file.write("-" * 40 + "\n")
         return products
 
 
