@@ -49,9 +49,10 @@ async def main(ctx: Context | None):
     WORKING_TIME_END = time(22, 0)
 
     def is_working_time():
-        germany_tz = zoneinfo.ZoneInfo("Europe/Berlin")
-        now = datetime.now(germany_tz).time()
-        return WORKING_TIME_START <= now <= WORKING_TIME_END
+        return True
+        # germany_tz = zoneinfo.ZoneInfo("Europe/Berlin")
+        # now = datetime.now(germany_tz).time()
+        # return WORKING_TIME_START <= now <= WORKING_TIME_END
 
     ka_client.previous_ads = ctx.kl_prev_ads
 
